@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Vencimientos - Tejedor</title>
+  <style>
+    :root {
+      --primary: #0052cc;
+      --primary-dark: #003d99;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #172b4d;
+      --border: #dfe1e6;
+      --danger: #de350b;
+      --warning: #ff9900;
+      --success: #36b37e;
+      --muted: #6b778c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+
+    header { background: var(--primary); color: white; padding: 16px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    header h1 { font-size: 1.3rem; }
+    header p { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+    .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 16px; }
+
+    h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--primary-dark); border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+
+    label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #444; }
+    input, select, textarea { width: 100%; padding: 10px; margin-bottom: 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
+    textarea { resize: vertical; height: 70px; }
+
+    button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: var(--primary-dark); }
+    button.btn-secondary { background: #6b778c; margin-top: 8px; }
+    button.btn-danger { background: var(--danger); margin-top: 8px; }
+
+    .nav-bar { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    .nav-bar button { flex: 1; min-width: 110px; padding: 8px 12px; font-size: 0.85rem; background: #e9ecef; color: #333; }
+    .nav-bar button.active { background: var(--primary); color: white; }
+
+    .user-banner { display: flex; justify-content: space-between; align-items: center; background: #e8f0fe; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.85rem; }
+
+    .product-card { background: white; border-left: 5px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .product-card.vencido { border-left-color: #888; background: #f8f9fa; opacity: 0.8; }
+    .product-card.critico { border-left-color: var(--danger); }
+    .product-card.proximo { border-left-color: var(--warning); }
+    .product-card.normal { border-left-color: var(--success); }
+    .product-card.retirado { border-left-color: #333; background: #e9ecef; }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; color: white; }
+    .badge-critico { background: var(--danger); }
+    .badge-proximo { background: var(--warning); color: #000; }
+    .badge-normal { background: var(--success); }
+    .badge-retirado { background: #555; }
+    .badge-vencido { background: #888; }
+
+    .actions { display: flex; gap: 8px; margin-top: 10px; }
+    .actions button { padding: 6px 10px; font-size: 0.8rem; flex: 1; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>MAR DEL PLATA TEJEDOR</h1>
+    <p>Control de Vencimientos</p>
+  </header>
+
+  <div class="container">
+
+    <!-- LOGIN -->
+    <div id="view-login" class="card">
+      <h2>Ingreso de Personal</h2>
+      <label for="select-user">Usuario</label>
+      <select id="select-user">
+        <option value="">Seleccione su usuario...</option>
+        <optgroup label="Supervisores">
+          <option value="DIEGO">DIEGO (Supervisor)</option>
+          <option value="YESICA">YESICA (Supervisor)</option>
+          <option value="LUCAS">LUCAS (Supervisor)</option>
+        </optgroup>
+        <optgroup label="Encargados">
+          <option value="MARCOS">MARCOS (Encargado)</option>
+          <option value="DAIANA">DAIANA (Encargado)</option>
+          <option value="AGUSTIN">AGUSTIN (Encargado)</option>
+        </optgroup>
+      </select>
+
+      <label for="input-pin">PIN de Seguridad</label>
+      <input type="password" id="input-pin" placeholder="Ingrese PIN (Inicial: 2039)" maxlength="6">
+
+      <button onclick="login()">Ingresar</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="hidden">
+      
+      <div class="user-banner">
+        <div>
+          <strong id="display-user-name">-</strong> (<span id="display-user-role">-</span>)
+        </div>
+        <div>
+          <button style="width:auto; padding:4px 8px; font-size:0.75rem;" onclick="openChangePinModal()">Cambiar PIN</button>
+          <button style="width:auto; padding:4px 8px; font-size:0.75rem; background:#6b778c;" onclick="logout()">Salir</button>
+        </div>
+      </div>
+
+      <div class="nav-bar">
+        <button id="tab-todos" class="active" onclick="setFilter('todos')">Todos</button>
+        <button id="tab-criticos" onclick="setFilter('criticos')">Críticos (≤15d)</button>
+        <button id="tab-nuevo" onclick="showForm()">+ Cargar</button>
+      </div>
+
+      <!-- FORMULARIO CARGA / EDICION -->
+      <div id="view-form" class="card hidden">
+        <h2 id="form-title">Cargar Producto</h2>
+        <form id="product-form" onsubmit="saveProduct(event)">
+          <input type="hidden" id="field-id">
+          
+          <label>Descripción *</label>
+          <input type="text" id="field-descripcion" required placeholder="Ej: Yogur Entero 1L">
+
+          <label>Cantidad *</label>
+          <input type="number" id="field-cantidad" min="1" required placeholder="Ej: 12">
+
+          <label>Fecha de Vencimiento *</label>
+          <input type="date" id="field-vencimiento" required>
+
+          <label>Lote</label>
+          <input type="text" id="field-lote" placeholder="Ej: L204B">
+
+          <label>Sector *</label>
+          <select id="field-sector" required>
+            <option value="">Seleccionar sector...</option>
+            <option value="LÁCTEOS">LÁCTEOS</option>
+            <option value="FIAMBRES Y QUESOS">FIAMBRES Y QUESOS</option>
+            <option value="CARNICERÍA">CARNICERÍA</option>
+            <option value="CONGELADOS">CONGELADOS</option>
+            <option value="ALMACÉN">ALMACÉN</option>
+            <option value="PANADERÍA">PANADERÍA</option>
+            <option value="BEBIDAS">BEBIDAS</option>
+            <option value="LIMPIEZA">LIMPIEZA</option>
+            <option value="PERFUMERÍA">PERFUMERÍA</option>
+          </select>
+
+          <label>Observaciones</label>
+          <textarea id="field-observaciones" placeholder="Detalles o comentarios adicionales..."></textarea>
+
+          <button type="submit">Guardar Producto</button>
+          <button type="button" class="btn-secondary" onclick="hideForm()">Cancelar</button>
+        </form>
+      </div>
+
+      <!-- LISTADO -->
+      <div id="list-container"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // DATOS DE USUARIOS Y ROLES
+    const USERS = {
+      "DIEGO": { role: "Supervisor", defaultPin: "2039" },
+      "YESICA": { role: "Supervisor", defaultPin: "2039" },
+      "LUCAS": { role: "Supervisor", defaultPin: "2039" },
+      "MARCOS": { role: "Encargado", defaultPin: "2039" },
+      "DAIANA": { role: "Encargado", defaultPin: "2039" },
+      "AGUSTIN": { role: "Encargado", defaultPin: "2039" }
+    };
+
+    let currentUser = null;
+    let products = JSON.parse(localStorage.getItem('products_tejedor')) || [];
+    let currentFilter = 'todos';
+
+    // PARÁMETROS QR
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const vistaParam = urlParams.get('vista');
+      const sectorParam = urlParams.get('sector');
+
+      if (vistaParam === 'criticos') currentFilter = 'criticos';
+      if (sectorParam) currentFilter = 'sector:' + sectorParam.toUpperCase();
+    };
+
+    function login() {
+      const username = document.getElementById('select-user').value;
+      const pin = document.getElementById('input-pin').value.trim();
+
+      if (!username) { alert('Seleccione un usuario'); return; }
+
+      const storedPin = localStorage.getItem('pin_' + username) || USERS[username].defaultPin;
+
+      if (pin === storedPin) {
+        currentUser = { name: username, role: USERS[username].role };
+        document.getElementById('display-user-name').innerText = currentUser.name;
+        document.getElementById('display-user-role').innerText = currentUser.role;
+
+        document.getElementById('view-login').classList.add('hidden');
+        document.getElementById('view-dashboard').classList.remove('hidden');
+
+        renderProducts();
+      } else {
+        alert('PIN incorrecto');
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('view-dashboard').classList.add('hidden');
+      document.getElementById('view-login').classList.remove('hidden');
+      document.getElementById('input-pin').value = '';
+    }
+
+    function openChangePinModal() {
+      const newPin = prompt('Ingrese su nuevo PIN de 4 a 6 dígitos:');
+      if (newPin && newPin.length >= 4) {
+        localStorage.setItem('pin_' + currentUser.name, newPin);
+        alert('PIN actualizado con éxito.');
+      } else if (newPin) {
+        alert('El PIN debe tener al menos 4 dígitos.');
+      }
+    }
+
+    function calculateDays(dateStr) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const target = new Date(dateStr + 'T00:00:00');
+      const diffTime = target - today;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function getStatus(days, retirado) {
+      if (retirado) return { label: 'Retirado', class: 'retirado' };
+      if (days < 0) return { label: 'Vencido', class: 'vencido' };
+      if (days <= 15) return { label: 'Crítico (≤15d)', class: 'critico' };
+      if (days <= 30) return { label: 'Próximo', class: 'proximo' };
+      return { label: 'Normal', class: 'normal' };
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('list-container');
+      container.innerHTML = '';
+
+      let filtered = [...products];
+
+      if (currentFilter === 'criticos') {
+        filtered = filtered.filter(p => !p.retirado && calculateDays(p.vencimiento) <= 15);
+      } else if (currentFilter.startsWith('sector:')) {
+        const sector = currentFilter.replace('sector:', '');
+        filtered = filtered.filter(p => p.sector.toUpperCase() === sector);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="card" style="text-align:center; color:#6b778c;">No hay productos registrados en esta vista.</div>';
+        return;
+      }
+
+      filtered.sort((a,b) => new Date(a.vencimiento) - new Date(b.vencimiento));
+
+      filtered.forEach(p => {
+        const days = calculateDays(p.vencimiento);
+        const status = getStatus(days, p.retirado);
+
+        const card = document.createElement('div');
+        card.className = `product-card ${status.class}`;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <strong>${p.descripcion}</strong>
+            <span class="badge badge-${status.class}">${status.label}</span>
+          </div>
+          <div style="font-size:0.85rem; margin-top:6px; color:#444;">
+            <div><strong>Sector:</strong> ${p.sector} | <strong>Cant:</strong> ${p.cantidad}</div>
+            <div><strong>Vence:</strong> ${p.vencimiento} (${days < 0 ? 'Vencido hace ' + Math.abs(days) + 'd' : 'Faltan ' + days + ' días'})</div>
+            ${p.lote ? `<div><strong>Lote:</strong> ${p.lote}</div>` : ''}
+            ${p.observaciones ? `<div style="margin-top:4px; font-style:italic; color:#666;">"${p.observaciones}"</div>` : ''}
+          </div>
+          <div class="actions">
+            <button onclick="editProduct('${p.id}')">Editar</button>
+            <button class="${p.retirado ? 'btn-secondary' : 'btn-danger'}" onclick="toggleRetirado('${p.id}')">
+              ${p.retirado ? 'Reactivar' : 'Marcar Retirado'}
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function showForm() {
+      document.getElementById('product-form').reset();
+      document.getElementById('field-id').value = '';
+      document.getElementById('form-title').innerText = 'Cargar Producto';
+      document.getElementById('view-form').classList.remove('hidden');
+    }
+
+    function hideForm() {
+      document.getElementById('view-form').classList.add('hidden');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('field-id').value || Date.now().toString();
+      const descripcion = document.getElementById('field-descripcion').value.trim();
+      const cantidad = document.getElementById('field-cantidad').value;
+      const vencimiento = document.getElementById('field-vencimiento').value;
+      const lote = document.getElementById('field-lote').value.trim();
+      const sector = document.getElementById('field-sector').value;
+      const observaciones = document.getElementById('field-observaciones').value.trim();
+
+      const existingIndex = products.findIndex(p => p.id === id);
+
+      const productData = {
+        id, descripcion, cantidad, vencimiento, lote, sector, observaciones,
+        retirado: existingIndex >= 0 ? products[existingIndex].retirado : false,
+        updatedBy: currentUser.name
+      };
+
+      if (existingIndex >= 0) {
+        products[existingIndex] = productData;
+      } else {
+        products.push(productData);
+      }
+
+      localStorage.setItem('products_tejedor', JSON.stringify(products));
+      hideForm();
+      renderProducts();
+    }
+
+    function editProduct(id) {
+      const p = products.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('field-id').value = p.id;
+      document.getElementById('field-descripcion').value = p.descripcion;
+      document.getElementById('field-cantidad').value = p.cantidad;
+      document.getElementById('field-vencimiento').value = p.vencimiento;
+      document.getElementById('field-lote').value = p.lote;
+      document.getElementById('field-sector').value = p.sector;
+      document.getElementById('field-observaciones').value = p.observaciones;
+
+      document.getElementById('form-title').innerText = 'Editar Producto';
+      document.getElementById('view-form').classList.remove('hidden');
+    }
+
+    function toggleRetirado(id) {
+      const p = products.find(item => item.id === id);
+      if (p) {
+        p.retirado = !p.retirado;
+        localStorage.setItem('products_tejedor', JSON.stringify(products));
+        renderProducts();
+      }
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
+      if (filter === 'todos') document.getElementById('tab-todos').classList.add('active');
+      if (filter === 'criticos') document.getElementById('tab-criticos').classList.add('active');
+      renderProducts();
+    }
+  </script>
+</body>
+</html>
