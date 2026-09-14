@@ -291,367 +291,361 @@ function toggleCameraScanner(){
       }
     },
     ()=>{}
-  ).catch(err=>{
-    alert("No se pudo iniciar la cámara: "+err);
-    stopCameraScanner();
+  ).catch(err => {
+    toast("No se pudo acceder a la cámara");
+    $('camera-modal').style.display='none';
   });
 }
 
 function stopCameraScanner(){
-  if(html5QrCode && html5QrCode.isScanning){
+  if(html5QrCode){
     html5QrCode.stop().then(()=>{
-      html5QrCode.clear();
       $('camera-modal').style.display='none';
-    }).catch(()=>{ $('camera-modal').style.display='none'; });
+    }).catch(()=>{
+      $('camera-modal').style.display='none';
+    });
   }else{
     $('camera-modal').style.display='none';
   }
 }
 
-// Navegación y Sesión
-function parseRoute(){
-  let p=new URLSearchParams(location.search),sector=(p.get('sector')||'').trim(),view=(p.get('vista')||'').toLowerCase();
-  let found=SECTORS.find(s=>s.toLowerCase()===sector.toLowerCase());
-  pendingRoute=found?{view:'product',sector:found}:view==='criticos'?{view:'critical',sector:''}:{view:'home',sector:''};
-  if(found)$('loginMessage').textContent=`Ingresá para cargar un vencimiento en ${found}.`;
-  else if(view==='criticos')$('loginMessage').textContent='Ingresá para consultar los productos críticos.';
+// Gestión de productos
+function openProduct(id='', sector=''){
+  $('editId').value=id;
+  $('productForm').reset();
+  $('maestroNotice').classList.add('hidden');
+  
+  if(id){
+    $('productTitle').textContent='Editar vencimiento';
+    const p=products.find(x=>x.id===id);
+    if(p){
+      $('sku').value=p.sku||'';
+      $('description').value=p.description||'';
+      $('quantity').value=p.quantity||1;
+      $('expiry').value=p.expiry||'';
+      $('batch').value=p.batch||'';
+      $('sector').value=p.sector||SECTORS[0];
+      $('notes').value=p.notes||'';
+    }
+  }else{
+    $('productTitle').textContent='Cargar vencimiento';
+    if(sector){
+      $('sector').value=sector;
+    } else if(lockedSector){
+      $('sector').value=lockedSector;
+    }
+  }
+  show('product');
 }
 
-function renderLogin(){
-  $('loginUser').innerHTML='<option value="">Seleccionar usuario</option>'+users.filter(u=>u.active).map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');
+// Guardar producto
+document.getElementById('productForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const id=$('editId').value;
+  const sku=$('sku').value.trim();
+  const description=$('description').value.trim();
+  const quantity=parseInt($('quantity').value)||1;
+  const expiry=$('expiry').value;
+  const batch=$('batch').value.trim();
+  const sector=$('sector').value;
+  const notes=$('notes').value.trim();
+
+  if(!description || !expiry || !sector){
+    toast('Completá los campos obligatorios');
+    return;
+  }
+
+  // Si hay SKU y no está en el maestro, lo agregamos automáticamente (Auto-Catálogo)
+  if(sku && !BASE_MAESTRO.some(item => String(item.sku) === sku)){
+    BASE_MAESTRO.push({ sku, description, sector });
+    saveMaestro();
+  }
+
+  if(id){
+    const p=products.find(x=>x.id===id);
+    if(p){
+      p.sku=sku; p.description=description; p.quantity=quantity; p.expiry=expiry; p.batch=batch; p.sector=sector; p.notes=notes;
+    }
+    toast('Vencimiento actualizado');
+  }else{
+    products.push({
+      id: uid(),
+      sku, description, quantity, expiry, batch, sector, notes,
+      dateAdded: new Date().toISOString()
+    });
+    toast('Vencimiento registrado');
+  }
+
+  saveProducts();
+  updateMetrics();
+  show('home');
+});
+
+// Cálculos de estado de vencimiento
+function getStatus(expiryDate){
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  const exp=new Date(expiryDate+'T00:00:00');
+  const diffTime=exp-today;
+  const diffDays=Math.ceil(diffTime/(1000*60*60*24));
+
+  if(diffDays<0) return 'vencido';
+  if(diffDays<=15) return 'critico';
+  if(diffDays<=30) return 'proximo';
+  return 'ok';
 }
 
-function applyUser(u){
-  current=u;
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  $('topName').textContent=u.name;
-  $('topRole').textContent=roleLabel(u.role);
-  $('avatar').textContent=u.name[0];
-  $('greeting').textContent=`Hola, ${u.name}`;
-  $('adminButton').classList.toggle('hidden',u.role!=='supervisor');
-  fillSectors();
-  update();
-  if(pendingRoute.view==='product') openProduct('',pendingRoute.sector);
-  else show(pendingRoute.view);
+function updateMetrics(){
+  let v=0, c=0, p=0, t=products.length;
+  products.forEach(prod=>{
+    const st=getStatus(prod.expiry);
+    if(st==='vencido') v++;
+    else if(st==='critico') c++;
+    else if(st==='proximo') p++;
+  });
+  $('mv').textContent=v;
+  $('mc').textContent=c;
+  $('mp').textContent=p;
+  $('mt').textContent=t;
+}
+
+// Renderizado de productos
+function renderProducts(){
+  const list=$('productList');
+  const search=$('search').value.toLowerCase();
+  const stateFilter=$('stateFilter').value;
+  const sectorFilter=$('sectorFilter').value;
+
+  let html='';
+  const filtered=products.filter(p=>{
+    const st=getStatus(p.expiry);
+    const matchSearch=p.description.toLowerCase().includes(search) || (p.sku && p.sku.toLowerCase().includes(search));
+    const matchState= !stateFilter || st===stateFilter;
+    const matchSector= !sectorFilter || p.sector===sectorFilter;
+    return matchSearch && matchState && matchSector;
+  });
+
+  if(filtered.length===0){
+    list.innerHTML='<div class="empty">No se encontraron productos registrados.</div>';
+    return;
+  }
+
+  filtered.forEach(p=>{
+    const st=getStatus(p.expiry);
+    let badgeText='', badgeClass='';
+    if(st==='vencido'){badgeText='VENCIDO'; badgeClass='vencido';}
+    else if(st==='critico'){badgeText='CRÍTICO (≤15 días)'; badgeClass='critico';}
+    else if(st==='proximo'){badgeText='PRÓXIMO (16-30 días)'; badgeClass='proximo';}
+    else{badgeText='EN VIGOR'; badgeClass='proximo';}
+
+    html+=`
+      <div class="item">
+        <div>
+          <h3>${esc(p.description)}</h3>
+          <div class="meta">
+            ${p.sku?`<span class="badge-sku">SKU: ${esc(p.sku)}</span>`:''}
+            <span>Sector: <strong>${esc(p.sector)}</strong></span>
+            <span>Cant: <strong>${p.quantity}</strong></span>
+            <span>Vence: <strong>${p.expiry}</strong></span>
+            ${p.batch?`<span>Lote: ${esc(p.batch)}</span>`:''}
+          </div>
+          ${p.notes?`<p style="margin:6px 0 0;font-size:12px;color:var(--muted);">${esc(p.notes)}</p>`:''}
+        </div>
+        <div style="text-align:right">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <div class="item-actions">
+            <button class="btn secondary small" onclick="openProduct('${p.id}')">Editar</button>
+            <button class="btn danger small" onclick="deleteProduct('${p.id}')">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  list.innerHTML=html;
+}
+
+function deleteProduct(id){
+  if(confirm('¿Eliminar este registro de vencimiento?')){
+    products=products.filter(x=>x.id!==id);
+    saveProducts();
+    updateMetrics();
+    renderProducts();
+    toast('Registro eliminado');
+  }
+}
+
+// Gestión de Usuarios y Login
+function initSelects(){
+  const sel=$('loginUser');
+  sel.innerHTML=users.filter(u=>u.active).map(u=>`<option value="${u.id}">${esc(u.name)} (${roleLabel(u.role)})</option>`).join('');
+  
+  const secSel=$('sector');
+  secSel.innerHTML=SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
+  
+  const sf=$('sectorFilter');
+  sf.innerHTML=`<option value="">Todos los sectores</option>`+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
 }
 
 function login(){
-  let u=users.find(x=>x.id===$('loginUser').value&&x.active);
-  if(!u||$('loginPin').value!==u.pin)return alert('Usuario o PIN incorrecto.');
-  sessionStorage.setItem(SK,u.id);
+  const uid=$('loginUser').value;
+  const pin=$('loginPin').value;
+  const user=users.find(u=>u.id===uid);
+
+  if(!user || user.pin!==pin){
+    toast('PIN incorrecto');
+    return;
+  }
+
+  current=user;
+  localStorage.setItem(SK, JSON.stringify(current));
   $('loginPin').value='';
-  applyUser(u);
+  bootApp();
 }
 
 function logout(){
-  sessionStorage.removeItem(SK);
   current=null;
-  $('app').classList.add('hidden');
+  localStorage.removeItem(SK);
   $('login').classList.remove('hidden');
-  renderLogin();
+  $('app').classList.add('hidden');
 }
 
-function show(id){
-  if(id==='users'&&current?.role!=='supervisor')return;
-  lockedSector='';
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  $(id).classList.add('active');
-  window.scrollTo(0,0);
-  if(id==='critical')renderProducts();
-  if(id==='users')renderUsers();
-  if(id==='home')update();
+function bootApp(){
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('topName').textContent=current.name;
+  $('topRole').textContent=roleLabel(current.role);
+  $('avatar').textContent=current.name.charAt(0);
+
+  if(current.role==='supervisor'){
+    $('adminButton').style.display='block';
+  }else{
+    $('adminButton').style.display='none';
+  }
+
+  updateMetrics();
+  renderProducts();
+  renderUsers();
+}
+
+function show(viewId){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  $(viewId).classList.add('active');
+  if(viewId==='critical'){
+    renderProducts();
+  }
 }
 
 function openAccount(){
-  $('profileAvatar').textContent=current.name[0];
+  $('profileAvatar').textContent=current.name.charAt(0);
   $('profileName').textContent=current.name;
-  $('profileRole').textContent=`Rol: ${roleLabel(current.role)}`;
-  $('profileSectors').textContent=current.role==='responsable'?`Sectores: ${current.sectors?.join(', ')||'Sin sectores asignados'}`:'Acceso general a sectores';
+  $('profileRole').textContent=roleLabel(current.role);
+  $('profileSectors').textContent=current.sectors && current.sectors.length ? 'Sectores: '+current.sectors.join(', ') : '';
   show('account');
 }
 
 function changeOwnPin(){
-  let np=prompt('Ingresá tu nuevo PIN de 4 dígitos:');
-  if(!np) return;
-  if(!/^\d{4}$/.test(np)) return alert('El PIN debe contener exactamente 4 números.');
-  current.pin=np;
-  users=users.map(u=>u.id===current.id?current:u);
-  saveUsers();
-  toast('PIN actualizado correctamente');
-}
-
-// Fechas y Estados
-function dateDays(s){
-  let[y,m,d]=s.split('-').map(Number),x=new Date(y,m-1,d),t=new Date();
-  x.setHours(0,0,0,0);t.setHours(0,0,0,0);
-  return Math.round((x-t)/86400000);
-}
-
-function state(p){
-  if(p.retired)return'retirado';
-  let n=dateDays(p.expiry);
-  return n<0?'vencido':n<=15?'critico':n<=30?'proximo':'normal';
-}
-
-function stateText(p){
-  let s=state(p),n=dateDays(p.expiry);
-  if(s==='vencido')return `Vencido hace ${Math.abs(n)} días`;
-  if(s==='critico')return n===0?'Vence hoy':`Vence en ${n} días`;
-  if(s==='proximo')return `Vence en ${n} días`;
-  return'Normal';
-}
-
-function update(){
-  let a=products.filter(p=>!p.retired);
-  $('mv').textContent=a.filter(p=>state(p)==='vencido').length;
-  $('mc').textContent=a.filter(p=>state(p)==='critico').length;
-  $('mp').textContent=a.filter(p=>state(p)==='proximo').length;
-  $('mt').textContent=a.length;
-}
-
-function fillSectors(){
-  let o='<option value="">Seleccionar sector</option>'+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-  $('sector').innerHTML=o;
-  $('sectorFilter').innerHTML='<option value="">Todos los sectores</option>'+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-  $('sectorChecks').innerHTML=SECTORS.map(s=>`<label class="check"><input type="checkbox" value="${s}"> ${s}</label>`).join('');
-}
-
-// Formulario de Producto
-function openProduct(id='',qrSector=''){
-  $('productForm').reset();
-  $('quantity').value=1;
-  $('editId').value='';
-  $('sku').value='';
-  $('maestroNotice').classList.add('hidden');
-  $('productTitle').textContent='Cargar vencimiento';
-  lockedSector=qrSector||'';
-  $('sector').disabled=false;
-  $('sectorBanner').classList.add('hidden');
-
-  if(id){
-    let p=products.find(x=>x.id===id);
-    if(p){
-      ['sku','description','quantity','expiry','batch','sector','notes'].forEach(k=>$(k).value=p[k]||'');
-      $('editId').value=id;
-      $('productTitle').textContent='Editar vencimiento';
-      onSkuInput();
-    }
-  }else if(lockedSector){
-    $('sector').value=lockedSector;
-    $('sector').disabled=true;
-    $('sectorBanner').textContent=`Cargando producto en: ${lockedSector}`;
-    $('sectorBanner').classList.remove('hidden');
-  }
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  $('product').classList.add('active');
-  window.scrollTo(0,0);
-  setTimeout(()=>$('sku').focus(), 100);
-}
-
-$('productForm').onsubmit=e=>{
-  e.preventDefault();
-  let id=$('editId').value,
-      skuVal=$('sku').value.trim(),
-      descVal=$('description').value.trim(),
-      old=products.find(p=>p.id===id);
-
-  // Incorporación / Actualización automática en el catálogo maestro
-  if(skuVal && descVal){
-    let matchIdx=BASE_MAESTRO.findIndex(m=>String(m.sku)===skuVal);
-    if(matchIdx===-1){
-      BASE_MAESTRO.push({sku:skuVal, description:descVal});
-      saveMaestro();
-    }else if(BASE_MAESTRO[matchIdx].description!==descVal){
-      BASE_MAESTRO[matchIdx].description=descVal;
-      saveMaestro();
-    }
-  }
-
-  let p={
-    id:id||uid(),
-    sku:skuVal,
-    description:descVal,
-    quantity:+$('quantity').value,
-    expiry:$('expiry').value,
-    batch:$('batch').value.trim(),
-    sector:lockedSector||$('sector').value,
-    notes:$('notes').value.trim(),
-    retired:old?.retired||false,
-    createdBy:old?.createdBy||current.name,
-    createdAt:old?.createdAt||new Date().toISOString(),
-    updatedBy:current.name,
-    updatedAt:new Date().toISOString()
-  };
-
-  products=id?products.map(x=>x.id===id?p:x):[...products,p];
-  saveProducts();
-  toast(id?'Producto actualizado':'Vencimiento registrado');
-  show('home');
-};
-
-// Renderizado de Lista de Productos Críticos
-function renderProducts(){
-  let q=$('search').value.toLowerCase().trim(),
-      st=$('stateFilter').value,
-      sec=$('sectorFilter').value;
-
-  let list=products.filter(p=>{
-    if(p.retired) return false;
-    let matchQ=!q || (p.description&&p.description.toLowerCase().includes(q)) || (p.sku&&p.sku.toLowerCase().includes(q)) || (p.batch&&p.batch.toLowerCase().includes(q));
-    let matchSt=!st || state(p)===st;
-    let matchSec=!sec || p.sector===sec;
-    return matchQ && matchSt && matchSec;
-  });
-
-  if(!list.length){
-    $('productList').innerHTML='<div class="empty">No se encontraron productos registrados.</div>';
-    return;
-  }
-
-  $('productList').innerHTML=list.map(p=>{
-    let s=state(p), stLbl=stateText(p);
-    let badgeClass=s==='vencido'?'vencido':s==='critico'?'critico':s==='proximo'?'proximo':'';
-    return `
-      <div class="item">
-        <div>
-          <h3>${esc(p.description)} ${p.sku?`<span class="badge-sku">SKU: ${esc(p.sku)}</span>`:''}</h3>
-          <div class="meta">
-            <span><strong>Cant:</strong> ${p.quantity}</span>
-            <span><strong>Vence:</strong> ${p.expiry}</span>
-            <span><strong>Sector:</strong> ${esc(p.sector)}</span>
-            ${p.batch?`<span><strong>Lote:</strong> ${esc(p.batch)}</span>`:''}
-            ${p.notes?`<span><strong>Obs:</strong> ${esc(p.notes)}</span>`:''}
-          </div>
-          <div class="item-actions">
-            <button class="btn secondary small" onclick="openProduct('${p.id}')">Editar</button>
-            <button class="btn danger small" onclick="retireProduct('${p.id}')">Retirar de Góndola</button>
-            ${current.role==='supervisor'?`<button class="btn secondary small" onclick="deleteProduct('${p.id}')">Eliminar</button>`:''}
-          </div>
-        </div>
-        <div>
-          <span class="badge ${badgeClass}">${stLbl}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function retireProduct(id){
-  if(confirm('¿Marcar este producto como retirado de góndola?')){
-    products=products.map(p=>p.id===id?{...p,retired:true,retiredBy:current.name,retiredAt:new Date().toISOString()}:p);
-    saveProducts();
-    toast('Producto retirado');
-    renderProducts();
-    update();
+  const newPin=prompt('Ingresá tu nuevo PIN (4 números):');
+  if(newPin && /^\d{4}$/.test(newPin)){
+    current.pin=newPin;
+    const u=users.find(x=>x.id===current.id);
+    if(u) u.pin=newPin;
+    saveUsers();
+    toast('PIN actualizado con éxito');
+  }else if(newPin){
+    toast('El PIN debe tener exactamente 4 números');
   }
 }
 
-function deleteProduct(id){
-  if(confirm('¿Eliminar definitivamente este registro?')){
-    products=products.filter(p=>p.id!==id);
-    saveProducts();
-    toast('Registro eliminado');
-    renderProducts();
-    update();
-  }
-}
-
-// Gestión de Usuarios
+// Administración de usuarios
 function renderUsers(){
-  $('userList').innerHTML=users.map(u=>`
-    <div class="userrow ${!u.active?'inactive':''}">
+  const list=$('userList');
+  list.innerHTML=users.map(u=>`
+    <div class="userrow ${u.active?'':'inactive'}">
       <div>
         <strong>${esc(u.name)}</strong>
-        <div style="font-size:12px;color:var(--muted)">${u.role==='responsable'?(u.sectors?.join(', ')||'Sin sectores'):'Acceso global'}</div>
+        <div style="font-size:11px;color:var(--muted)">PIN: ****</div>
       </div>
       <div><span class="role ${u.role}">${roleLabel(u.role)}</span></div>
-      <div><span class="badge ${u.active?'proximo':'vencido'}">${u.active?'Activo':'Desactivado'}</span></div>
-      <div>
+      <div><span style="font-size:12px">${u.active?'Activo':'Desactivado'}</span></div>
+      <div style="display:flex;gap:6px">
         <button class="btn secondary small" onclick="openUser('${u.id}')">Editar</button>
       </div>
     </div>
   `).join('');
 }
 
-function toggleSectorAssignment(){
-  let r=$('userRole').value;
-  $('sectorAssignment').classList.toggle('hidden', r!=='responsable');
-}
-
 function openUser(id=''){
+  $('userEditId').value=id;
   $('userForm').reset();
-  $('userEditId').value='';
-  $('userTitle').textContent='Crear usuario';
-  toggleSectorAssignment();
-
   if(id){
-    let u=users.find(x=>x.id===id);
+    $('userTitle').textContent='Editar usuario';
+    const u=users.find(x=>x.id===id);
     if(u){
-      $('userEditId').value=u.id;
       $('userName').value=u.name;
       $('userRole').value=u.role;
       $('userPin').value=u.pin;
       $('userActive').value=String(u.active);
-      $('userTitle').textContent='Editar usuario';
-      toggleSectorAssignment();
-
-      if(u.role==='responsable'){
-        document.querySelectorAll('#sectorChecks input').forEach(ck=>{
-          ck.checked=(u.sectors||[]).includes(ck.value);
-        });
-      }
     }
+  }else{
+    $('userTitle').textContent='Crear usuario';
   }
   show('userFormView');
 }
 
-$('userForm').onsubmit=e=>{
+document.getElementById('userForm').addEventListener('submit', (e)=>{
   e.preventDefault();
-  let id=$('userEditId').value,
-      name=$('userName').value.trim().toUpperCase(),
-      role=$('userRole').value,
-      pin=$('userPin').value.trim(),
-      active=$('userActive').value==='true';
+  const id=$('userEditId').value;
+  const name=$('userName').value.trim();
+  const role=$('userRole').value;
+  const pin=$('userPin').value.trim();
+  const active=$('userActive').value==='true';
 
-  if(!/^\d{4}$/.test(pin)) return alert('El PIN debe tener exactamente 4 números.');
-
-  let selectedSectors=[];
-  if(role==='responsable'){
-    document.querySelectorAll('#sectorChecks input:checked').forEach(ck=>selectedSectors.push(ck.value));
+  if(!name || !pin){
+    toast('Completá los campos obligatorios');
+    return;
   }
 
-  let uObj={
-    id: id || name.toLowerCase().replace(/\s+/g,'_'),
-    name: name,
-    pin: pin,
-    role: role,
-    active: active,
-    sectors: selectedSectors
-  };
+  if(!/^\d{4}$/.test(pin)){
+    toast('El PIN debe tener 4 dígitos numéricos');
+    return;
+  }
 
   if(id){
-    users=users.map(u=>u.id===id?uObj:u);
+    const u=users.find(x=>x.id===id);
+    if(u){
+      u.name=name; u.role=role; u.pin=pin; u.active=active;
+    }
+    toast('Usuario actualizado');
   }else{
-    if(users.some(u=>u.id===uObj.id)) return alert('Ya existe un usuario con ese nombre.');
-    users.push(uObj);
+    users.push({
+      id: uid(),
+      name, role, pin, active, sectors:[]
+    });
+    toast('Usuario creado');
   }
 
   saveUsers();
-  toast(id?'Usuario actualizado':'Usuario creado');
+  renderUsers();
   show('users');
-};
+});
 
-// Inicialización de la App
+// Inicialización general al cargar la página
 window.addEventListener('DOMContentLoaded', ()=>{
-  parseRoute();
-  renderLogin();
-  fillSectors();
-
-  let sess=sessionStorage.getItem(SK);
-  let u=users.find(x=>x.id===sess && x.active);
-  if(u){
-    applyUser(u);
+  initSelects();
+  const savedSession=localStorage.getItem(SK);
+  if(savedSession){
+    try{
+      current=JSON.parse(savedSession);
+      const found=users.find(u=>u.id===current.id);
+      if(found && found.active){
+        current=found;
+        bootApp();
+      }else{
+        logout();
+      }
+    }catch(e){
+      logout();
+    }
   }
 });
 </script>
