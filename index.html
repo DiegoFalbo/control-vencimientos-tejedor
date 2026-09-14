@@ -8,7 +8,7 @@
 
 <!-- Librerías Externas -->
 <script src="https://unpkg.com/html5-qrcode"></script>
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -23,14 +23,11 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
 .card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.small{padding:7px 10px;font-size:11px}.sector-banner{background:#e9f4ff;border:1px solid #aed2f5;color:#124f84;border-radius:13px;padding:12px 14px;margin-bottom:14px;font-weight:800}
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:13px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:15px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px}.item h3{margin:0 0 7px;font-size:17px}.meta{display:flex;flex-wrap:wrap;gap:6px 13px;color:var(--muted);font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.vencido{background:#fde0e0;color:#a51b1b}.badge.critico{background:#ffe5d2;color:#ae4900}.badge.proximo{background:#fff1c0;color:#775600}.badge-sku{background:#e2e8f0;color:#334155;padding:2px 7px;border-radius:6px;font-weight:800;font-size:11px}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.empty{text-align:center;color:var(--muted);padding:35px}.notice{background:#eef6ff;border:1px solid #bfd8f5;color:#164f82;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}.warning{background:#fff5ce;border:1px solid #f0d46d;color:#6e5600;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}
 .userrow{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:9px}.role{font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px;display:inline-flex}.role.supervisor{background:#e9ddff;color:#563090}.role.responsable{background:#dceeff;color:#174c83}.role.encargado{background:#e5f5eb;color:#18633b}.inactive{opacity:.55}.checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.check{display:flex;gap:7px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px}.check input{width:auto}.profile{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}.profile-avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:28px;font-weight:900}.profile h3{margin:0 0 5px}.profile p{margin:3px 0;color:var(--muted)}.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,110px);background:#102943;color:#fff;border-radius:12px;padding:12px 17px;opacity:0;transition:.3s;z-index:100}.toast.show{opacity:1;transform:translate(-50%,0)}
-
-.input-group{display:flex;gap:8px}
-.input-group input{flex:1}
+.input-group{display:flex;gap:8px}.input-group input{flex:1}
 #camera-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(7,26,51,0.85);z-index:1000;align-items:center;justify-content:center;padding:15px}
 #camera-modal-content{background:#fff;padding:20px;border-radius:20px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3)}
 #reader{width:100%;margin:12px 0;border-radius:12px;overflow:hidden;background:#000}
 .field-hint{font-size:12px;color:var(--orange);margin-top:5px;font-weight:700}
-
 @media(max-width:760px){.actions{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.grid,.filters,.userrow{grid-template-columns:1fr}.full{grid-column:auto}.welcome{align-items:start;flex-direction:column}.uinfo{display:none}.checkgrid{grid-template-columns:1fr 1fr}.item{grid-template-columns:1fr}.form-actions .btn{flex:1}.action{min-height:125px}.top{position:relative}.profile{grid-template-columns:1fr;text-align:center}.profile-avatar{margin:auto}}
 </style>
 </head>
@@ -41,7 +38,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <div class="logo">V</div>
     <h1>Control de Vencimientos</h1>
     <div class="station">MAR DEL PLATA TEJEDOR</div>
-    <p class="sub" id="loginMessage">Cargando usuarios desde la nube...</p>
+    <p class="sub" id="loginMessage">Seleccioná tu usuario e ingresá el PIN.</p>
     <div class="field"><label>Usuario</label><select id="loginUser"></select></div>
     <div class="field"><label>PIN</label><input id="loginPin" class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
     <button class="login-btn" onclick="login()">Ingresar</button>
@@ -53,7 +50,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <div class="top-inner">
       <div class="brand">
         <h1>Control de Vencimientos</h1>
-        <small>MAR DEL PLATA TEJEDOR · v2.5 Cloud Sync</small>
+        <small>MAR DEL PLATA TEJEDOR · v2.5 Nube Firebase</small>
       </div>
       <div class="userbox">
         <div class="uinfo"><strong id="topName"></strong><span id="topRole"></span></div>
@@ -68,7 +65,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <section id="home" class="view active">
       <div class="welcome">
         <div><h2 id="greeting">Panel principal</h2><p>Registrá vencimientos y controlá los productos que requieren atención.</p></div>
-        <span class="sync">Sincronizado con Firebase ☁️</span>
+        <span class="sync">Sincronizado en la nube</span>
       </div>
       <div class="actions">
         <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
@@ -153,7 +150,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <!-- Administrar Usuarios -->
     <section id="users" class="view">
       <div class="head"><h2>Administrar usuarios</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="notice">Disponible únicamente para supervisores. Los usuarios se sincronizan en tiempo real con Firebase.</div>
+      <div class="notice">Disponible únicamente para supervisores. Los usuarios desactivados conservan su historial.</div>
       <div class="card">
         <button class="btn primary" onclick="openUser()">＋ Crear usuario</button>
         <div id="userList" style="margin-top:15px"></div>
@@ -206,96 +203,177 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
 <div id="toast" class="toast"></div>
 
 <script>
-// --- CONFIGURACIÓN DE FIREBASE (Reemplaza con tus datos reales) ---
+// ==========================================
+// CONFIGURACIÓN DE FIREBASE (Reemplaza con tus datos reales)
+// ==========================================
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE.appspot.com",
-  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  apiKey: "TU_API_KEY_AQUI",
+  authDomain: "tu-proyecto.firebaseapp.com",
+  projectId: "tu-proyecto",
+  storageBucket: "tu-proyecto.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
   appId: "TU_APP_ID"
 };
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const SECTORS=['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
-const PK='cv_products_v22',SK='cv_session_v22',MK='cv_maestro_v22';
-
-let users=[];
-let products=JSON.parse(localStorage.getItem(PK)||'[]');
-let BASE_MAESTRO=JSON.parse(localStorage.getItem(MK)||'[]');
+const SK='cv_session_v22';
 
 let current=null,lockedSector='',pendingRoute={view:'home',sector:''};
 let html5QrCode=null;
 
-function defaultUsers(){
-  return[
-    {id:'diego',name:'DIEGO',pin:'2039',role:'supervisor',active:true,sectors:[]},
-    {id:'yesica',name:'YESICA',pin:'2039',role:'supervisor',active:true,sectors:[]},
-    {id:'lucas',name:'LUCAS',pin:'2039',role:'supervisor',active:true,sectors:[]},
-    {id:'marcos',name:'MARCOS',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'daiana',name:'DAIANA',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'agustin',name:'AGUSTIN',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'lautaro',name:'LAUTARO',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'abril',name:'ABRIL',pin:'2039',role:'encargado',active:true,sectors:[]}
-  ];
-}
+let users=[];
+let products=[];
+let BASE_MAESTRO=[];
 
 const $=x=>document.getElementById(x);
-const saveProducts=()=>localStorage.setItem(PK,JSON.stringify(products));
-const saveMaestro=()=>localStorage.setItem(MK,JSON.stringify(BASE_MAESTRO));
-
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)}
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
 
-// Cargar usuarios desde Firestore ('usuarios')
-async function loadUsersFromCloud(){
-  try{
-    const snapshot=await db.collection('usuarios').get();
-    if(snapshot.empty){
-      // Si la colección está vacía, cargamos los usuarios por defecto en Firestore
-      const defs = defaultUsers();
-      for(let u of defs){
-        await db.collection('usuarios').doc(u.id).set({
-          nombre: u.name,
-          pin: u.pin,
-          rol: u.role,
-          activo: u.active,
-          sectores: u.sectors
-        });
-      }
-      users = defs;
-    }else{
-      users=[];
-      snapshot.forEach(doc=>{
-        let d = doc.data();
-        users.push({
-          id: doc.id,
-          name: d.nombre || '',
-          pin: d.pin || '',
-          role: d.rol || 'encargado',
-          active: d.activo !== undefined ? d.activo : true,
-          sectors: d.sectores || []
-        });
-      });
+// ==========================================
+// SINCRONIZACIÓN EN TIEMPO REAL CON FIRESTORE
+// ==========================================
+function initFirebaseSync() {
+  db.collection('users').onSnapshot(snapshot => {
+    if (snapshot.empty) {
+      const defaults = [
+        {id:'diego',name:'DIEGO',pin:'2039',role:'supervisor',active:true,sectors:[]},
+        {id:'yesica',name:'YESICA',pin:'2039',role:'supervisor',active:true,sectors:[]},
+        {id:'lucas',name:'LUCAS',pin:'2039',role:'supervisor',active:true,sectors:[]},
+        {id:'marcos',name:'MARCOS',pin:'2039',role:'encargado',active:true,sectors:[]},
+        {id:'daiana',name:'DAIANA',pin:'2039',role:'encargado',active:true,sectors:[]},
+        {id:'agustin',name:'AGUSTIN',pin:'2039',role:'encargado',active:true,sectors:[]}
+      ];
+      defaults.forEach(u => db.collection('users').doc(u.id).set(u));
+    } else {
+      users = [];
+      snapshot.forEach(doc => users.push(doc.data()));
+      initLoginUsers();
+      if(current && current.role === 'supervisor') renderUsers();
     }
-  }catch(e){
-    console.error("Error cargando usuarios de Firestore:", e);
-    users = defaultUsers();
-  }
-  renderLogin();
+  });
+
+  db.collection('products').onSnapshot(snapshot => {
+    products = [];
+    snapshot.forEach(doc => {
+      products.push({ id: doc.id, ...doc.data() });
+    });
+    if(typeof renderMetrics === 'function') renderMetrics();
+    if(typeof renderProducts === 'function') renderProducts();
+  });
+
+  db.collection('maestro').onSnapshot(snapshot => {
+    BASE_MAESTRO = [];
+    snapshot.forEach(doc => {
+      BASE_MAESTRO.push({ id: doc.id, ...doc.data() });
+    });
+  });
 }
 
-// Búsqueda y Verificación en Maestro
+async function saveUserToFirestore(u) {
+  await db.collection('users').doc(u.id).set(u);
+}
+
+async function saveProductToFirestore(p) {
+  if(!p.id) p.id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+  await db.collection('products').doc(p.id).set(p);
+}
+
+async function deleteProductFromFirestore(id) {
+  await db.collection('products').doc(id).delete();
+}
+
+async function saveMaestroToFirestore(item) {
+  const maestroId = String(item.sku);
+  await db.collection('maestro').doc(maestroId).set(item);
+}
+
+// --- GESTIÓN DE USUARIOS Y SESIÓN ---
+
+function initLoginUsers() {
+  const select = $('loginUser');
+  if (!select) return;
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">Seleccioná tu usuario...</option>' +
+    users.filter(u => u.active).map(u => `<option value="${u.id}">${esc(u.name)} (${roleLabel(u.role)})</option>`).join('');
+  if(currentVal) select.value = currentVal;
+}
+
+function login() {
+  const userId = $('loginUser').value;
+  const pin = $('loginPin').value.trim();
+
+  if (!userId) { toast('Seleccioná un usuario'); return; }
+  if (!pin) { toast('Ingresá el PIN'); return; }
+
+  const user = users.find(u => u.id === userId);
+  if (!user || !user.active) { toast('Usuario no válido o desactivado'); return; }
+  if (user.pin !== pin) { toast('PIN incorrecto'); return; }
+
+  current = user;
+  localStorage.setItem(SK, JSON.stringify({ id: user.id, time: Date.now() }));
+  
+  $('loginPin').value = '';
+  setupInterface();
+  show('home');
+  toast(`¡Bienvenido, ${user.name}!`);
+}
+
+function logout() {
+  current = null;
+  localStorage.removeItem(SK);
+  $('loginPin').value = '';
+  initLoginUsers();
+  $('login').classList.remove('hidden');
+  $('app').classList.add('hidden');
+  toast('Sesión cerrada');
+}
+
+function setupInterface() {
+  if (!current) return;
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  $('topName').textContent = current.name;
+  $('topRole').textContent = roleLabel(current.role);
+  $('avatar').textContent = current.name.charAt(0).toUpperCase();
+
+  const adminBtn = $('adminButton');
+  if (adminBtn) {
+    adminBtn.classList.toggle('hidden', current.role !== 'supervisor');
+  }
+
+  populateSectors();
+  if (typeof renderMetrics === 'function') renderMetrics();
+  if (typeof renderProducts === 'function') renderProducts();
+  if (current.role === 'supervisor' && typeof renderUsers === 'function') {
+    renderUsers();
+  }
+}
+
+function populateSectors() {
+  const sectorSelect = $('sector');
+  const sectorFilter = $('sectorFilter');
+
+  let optionsHtml = '<option value="">Seleccioná un sector...</option>';
+  SECTORS.forEach(s => { optionsHtml += `<option value="${esc(s)}">${esc(s)}</option>`; });
+  if (sectorSelect) sectorSelect.innerHTML = optionsHtml;
+  
+  let filterHtml = '<option value="">Todos los sectores</option>';
+  SECTORS.forEach(s => { filterHtml += `<option value="${esc(s)}">${esc(s)}</option>`; });
+  if (sectorFilter) sectorFilter.innerHTML = filterHtml;
+}
+
 function onSkuInput(){
   const val=$('sku').value.trim();
   const notice=$('maestroNotice');
-  if(!val){notice.classList.add('hidden');return false;}
+
+  if(!val){ notice.classList.add('hidden'); return false; }
+
   const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
   if(match){
     $('description').value=match.description;
@@ -314,14 +392,12 @@ window.addEventListener('DOMContentLoaded', ()=>{
       if(e.key === 'Enter'){
         e.preventDefault();
         const existe = onSkuInput();
-        if(existe) $('quantity').focus();
-        else $('description').focus();
+        if(existe){ $('quantity').focus(); } else { $('description').focus(); }
       }
     });
   }
 });
 
-// Escáner con Cámara
 function toggleCameraScanner(){
   $('camera-modal').style.display='flex';
   html5QrCode=new Html5Qrcode("reader");
@@ -332,371 +408,328 @@ function toggleCameraScanner(){
       $('sku').value=decodedText;
       const existe = onSkuInput();
       stopCameraScanner();
-      if(existe) $('quantity').focus();
-      else $('description').focus();
+      if(existe){ $('quantity').focus(); } else { $('description').focus(); }
     },
     ()=>{}
-  ).catch(err=>{
-    alert("No se pudo iniciar la cámara: "+err);
+  ).catch(e => {
+    console.error("Error al iniciar la cámara:", e);
+    toast("No se pudo iniciar la cámara");
     stopCameraScanner();
   });
 }
 
 function stopCameraScanner(){
-  if(html5QrCode && html5QrCode.isScanning){
-    html5QrCode.stop().then(()=>{
+  if(html5QrCode){
+    html5QrCode.stop().then(() => {
       html5QrCode.clear();
       $('camera-modal').style.display='none';
-    }).catch(()=>{ $('camera-modal').style.display='none'; });
-  }else{
+    }).catch(() => { $('camera-modal').style.display='none'; });
+  } else {
     $('camera-modal').style.display='none';
   }
 }
 
-// Navegación y Sesión
-function parseRoute(){
-  let p=new URLSearchParams(location.search),sector=(p.get('sector')||'').trim(),view=(p.get('vista')||'').toLowerCase();
-  let found=SECTORS.find(s=>s.toLowerCase()===sector.toLowerCase());
-  pendingRoute=found?{view:'product',sector:found}:view==='criticos'?{view:'critical',sector:''}:{view:'home',sector:''};
-  if(found)$('loginMessage').textContent=`Ingresá para cargar un vencimiento en ${found}.`;
-  else if(view==='criticos')$('loginMessage').textContent='Ingresá para consultar los productos críticos.';
-  else $('loginMessage').textContent='Seleccioná tu usuario e ingresá el PIN.';
-}
-
-function renderLogin(){
-  $('loginUser').innerHTML='<option value="">Seleccionar usuario</option>'+users.filter(u=>u.active).map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');
-}
-
-function applyUser(u){
-  current=u;
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  $('topName').textContent=u.name;
-  $('topRole').textContent=roleLabel(u.role);
-  $('avatar').textContent=u.name[0];
-  $('greeting').textContent=`Hola, ${u.name}`;
-  $('adminButton').classList.toggle('hidden',u.role!=='supervisor');
-  fillSectors();
-  update();
-  if(pendingRoute.view==='product') openProduct('',pendingRoute.sector);
-  else show(pendingRoute.view);
-}
-
-function login(){
-  let u=users.find(x=>x.id===$('loginUser').value&&x.active);
-  if(!u||$('loginPin').value!==u.pin)return alert('Usuario o PIN incorrecto.');
-  sessionStorage.setItem(SK,u.id);
-  $('loginPin').value='';
-  applyUser(u);
-}
-
-function logout(){
-  sessionStorage.removeItem(SK);
-  current=null;
-  $('app').classList.add('hidden');
-  $('login').classList.remove('hidden');
-  renderLogin();
-}
-
-function show(id){
-  if(id==='users'&&current?.role!=='supervisor')return;
-  lockedSector='';
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  $(id).classList.add('active');
-  window.scrollTo(0,0);
-  if(id==='critical')renderProducts();
-  if(id==='users')renderUsers();
-  if(id==='home')update();
-}
-
-function openAccount(){
-  $('profileAvatar').textContent=current.name[0];
-  $('profileName').textContent=current.name;
-  $('profileRole').textContent=`Rol: ${roleLabel(current.role)}`;
-  $('profileSectors').textContent=current.role==='responsable'?`Sectores: ${current.sectors?.join(', ')||'Sin sectores asignados'}`:'Acceso general a sectores';
-  show('account');
-}
-
-async function changeOwnPin(){
-  let np=prompt('Ingresá tu nuevo PIN de 4 dígitos:');
-  if(!np) return;
-  if(!/^\d{4}$/.test(np)) return alert('El PIN debe contener exactamente 4 números.');
-  current.pin=np;
-  try{
-    await db.collection('usuarios').doc(current.id).update({ pin: np });
-    toast('PIN actualizado en la nube ☁️');
-    await loadUsersFromCloud();
-  }catch(e){
-    console.error(e);
-    alert('Error al actualizar el PIN en la nube.');
-  }
-}
-
-// Fechas y Estados
-function dateDays(s){
-  let[y,m,d]=s.split('-').map(Number),x=new Date(y,m-1,d),t=new Date();
-  x.setHours(0,0,0,0);t.setHours(0,0,0,0);
-  return Math.round((x-t)/86400000);
-}
-
-function state(p){
-  if(p.retired)return'retirado';
-  let n=dateDays(p.expiry);
-  return n<0?'vencido':n<=15?'critico':n<=30?'proximo':'normal';
-}
-
-function stateText(p){
-  let s=state(p),n=dateDays(p.expiry);
-  if(s==='vencido')return `Vencido hace ${Math.abs(n)} días`;
-  if(s==='critico')return n===0?'Vence hoy':`Vence en ${n} días`;
-  if(s==='proximo')return `Vence en ${n} días`;
-  return'Normal';
-}
-
-function update(){
-  let a=products.filter(p=>!p.retired);
-  $('mv').textContent=a.filter(p=>state(p)==='vencido').length;
-  $('mc').textContent=a.filter(p=>state(p)==='critico').length;
-  $('mp').textContent=a.filter(p=>state(p)==='proximo').length;
-  $('mt').textContent=a.length;
-}
-
-function fillSectors(){
-  let o='<option value="">Seleccionar sector</option>'+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-  $('sector').innerHTML=o;
-  $('sectorFilter').innerHTML='<option value="">Todos los sectores</option>'+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-  $('sectorChecks').innerHTML=SECTORS.map(s=>`<label class="check"><input type="checkbox" value="${s}"> ${s}</label>`).join('');
-}
-
-// Formulario de Producto
-function openProduct(id='',qrSector=''){
-  $('productForm').reset();
-  $('quantity').value=1;
-  $('editId').value='';
-  $('sku').value='';
-  $('maestroNotice').classList.add('hidden');
-  $('productTitle').textContent='Cargar vencimiento';
-  lockedSector=qrSector||'';
-  $('sector').disabled=false;
-  $('sectorBanner').classList.add('hidden');
-
-  if(id){
-    let p=products.find(x=>x.id===id);
-    if(p){
-      ['sku','description','quantity','expiry','batch','sector','notes'].forEach(k=>$(k).value=p[k]||'');
-      $('editId').value=id;
-      $('productTitle').textContent='Editar vencimiento';
-      onSkuInput();
-    }
-  }else if(lockedSector){
-    $('sector').value=lockedSector;
-    $('sector').disabled=true;
-    $('sectorBanner').textContent=`Cargando producto en: ${lockedSector}`;
-    $('sectorBanner').classList.remove('hidden');
-  }
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  $('product').classList.add('active');
-  window.scrollTo(0,0);
-}
-
-$('productForm').onsubmit=e=>{
+document.getElementById('productForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  let id=$('editId').value,
-      skuVal=$('sku').value.trim(),
-      descVal=$('description').value.trim(),
-      old=products.find(p=>p.id===id);
+  const id = $('editId').value;
+  const sku = $('sku').value.trim();
+  const description = $('description').value.trim();
+  const quantity = parseInt($('quantity').value) || 1;
+  const expiry = $('expiry').value;
+  const batch = $('batch').value.trim();
+  const sector = $('sector').value;
+  const notes = $('notes').value.trim();
 
-  if(skuVal && descVal){
-    let exists=BASE_MAESTRO.some(m=>String(m.sku)===skuVal);
-    if(!exists){
-      BASE_MAESTRO.push({sku:skuVal, description:descVal});
-      saveMaestro();
-    }
-  }
-
-  let p={
-    id:id||uid(),
-    sku:skuVal,
-    description:descVal,
-    quantity:+$('quantity').value,
-    expiry:$('expiry').value,
-    batch:$('batch').value.trim(),
-    sector:lockedSector||$('sector').value,
-    notes:$('notes').value.trim(),
-    retired:old?.retired||false,
-    createdBy:old?.createdBy||current.name,
-    createdAt:old?.createdAt||new Date().toISOString(),
-    updatedBy:current.name,
-    updatedAt:new Date().toISOString()
-  };
-
-  products=id?products.map(x=>x.id===id?p:x):[...products,p];
-  saveProducts();
-  toast(id?'Producto actualizado':'Vencimiento registrado');
-  show('home');
-};
-
-// Renderizado de Lista de Productos Críticos
-function renderProducts(){
-  let q=$('search').value.toLowerCase().trim(),
-      st=$('stateFilter').value,
-      sec=$('sectorFilter').value;
-
-  let list=products.filter(p=>{
-    if(p.retired) return false;
-    let matchQ=!q || (p.description&&p.description.toLowerCase().includes(q)) || (p.sku&&p.sku.toLowerCase().includes(q)) || (p.batch&&p.batch.toLowerCase().includes(q));
-    let matchSt=!st || state(p)===st;
-    let matchSec=!sec || p.sector===sec;
-    return matchQ && matchSt && matchSec;
-  });
-
-  if(!list.length){
-    $('productList').innerHTML='<div class="empty">No se encontraron productos registrados.</div>';
+  if(!description || !expiry || !sector){
+    toast('Completá los campos obligatorios');
     return;
   }
 
-  $('productList').innerHTML=list.map(p=>{
-    let s=state(p), stLbl=stateText(p);
-    let badgeClass=s==='vencido'?'vencido':s==='critico'?'critico':s==='proximo'?'proximo':'';
+  if(sku && !BASE_MAESTRO.some(item => String(item.sku) === sku)){
+    const newMaestroItem = { sku, description };
+    await saveMaestroToFirestore(newMaestroItem);
+  }
+
+  const productData = {
+    sku, description, quantity, expiry, batch, sector, notes,
+    updatedAt: new Date().toISOString(),
+    updatedBy: current.name
+  };
+
+  if(id) {
+    productData.id = id;
+    await saveProductToFirestore(productData);
+    toast('Producto actualizado en la nube');
+  } else {
+    await saveProductToFirestore(productData);
+    toast('Vencimiento registrado con éxito');
+  }
+
+  $('productForm').reset();
+  $('editId').value = '';
+  $('maestroNotice').classList.add('hidden');
+  show('home');
+});
+
+function renderMetrics(){
+  const today = new Date().toISOString().split('T')[0];
+  let v=0, c=0, p=0, t=products.length;
+
+  products.forEach(item => {
+    const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
+    if(diff < 0) v++;
+    else if(diff <= 15) c++;
+    else if(diff <= 30) p++;
+  });
+
+  $('mv').textContent = v;
+  $('mc').textContent = c;
+  $('mp').textContent = p;
+  $('mt').textContent = t;
+}
+
+function renderProducts(){
+  const container = $('productList');
+  if(!container) return;
+
+  const search = $('search').value.toLowerCase();
+  const stateFilter = $('stateFilter').value;
+  const sectorFilter = $('sectorFilter').value;
+  const today = new Date().toISOString().split('T')[0];
+
+  const filtered = products.filter(item => {
+    const matchesSearch = item.description.toLowerCase().includes(search) || (item.sku && item.sku.toLowerCase().includes(search));
+    const matchesSector = !sectorFilter || item.sector === sectorFilter;
+    
+    const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
+    let state = 'normal';
+    if(diff < 0) state = 'vencido';
+    else if(diff <= 15) state = 'critico';
+    else if(diff <= 30) state = 'proximo';
+
+    const matchesState = !stateFilter || state === stateFilter;
+    return matchesSearch && matchesSector && matchesState;
+  });
+
+  if(filtered.length === 0){
+    container.innerHTML = '<div class="empty">No hay registros que coincidan con los filtros.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => {
+    const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
+    let badgeClass = 'proximo', badgeText = `Vence en ${diff} días`;
+    if(diff < 0){ badgeClass = 'vencido'; badgeText = `Vencido hace ${Math.abs(diff)} días`; }
+    else if(diff === 0){ badgeClass = 'vencido'; badgeText = 'Vence hoy'; }
+    else if(diff <= 15){ badgeClass = 'critico'; badgeText = `Crítico (${diff} días)`; }
+
     return `
       <div class="item">
         <div>
-          <h3>${esc(p.description)} ${p.sku?`<span class="badge-sku">SKU: ${esc(p.sku)}</span>`:''}</h3>
+          <h3>${esc(item.description)}</h3>
           <div class="meta">
-            <span><strong>Cant:</strong> ${p.quantity}</span>
-            <span><strong>Vence:</strong> ${p.expiry}</span>
-            <span><strong>Sector:</strong> ${esc(p.sector)}</span>
-            ${p.batch?`<span><strong>Lote:</strong> ${esc(p.batch)}</span>`:''}
-            ${p.notes?`<span><strong>Obs:</strong> ${esc(p.notes)}</span>`:''}
+            ${item.sku ? `<span class="badge-sku">SKU: ${esc(item.sku)}</span>` : ''}
+            <span>Cant: <b>${item.quantity}</b></span>
+            <span>Sector: <b>${esc(item.sector)}</b></span>
+            <span>Vencimiento: <b>${item.expiry}</b></span>
+            ${item.batch ? `<span>Lote: ${esc(item.batch)}</span>` : ''}
           </div>
-          <div class="item-actions">
-            <button class="btn secondary small" onclick="openProduct('${p.id}')">Editar</button>
-            <button class="btn danger small" onclick="retireProduct('${p.id}')">Retirar de Góndola</button>
-            ${current.role==='supervisor'?`<button class="btn secondary small" onclick="deleteProduct('${p.id}')">Eliminar</button>`:''}
-          </div>
+          ${item.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:5px">Obs: ${esc(item.notes)}</div>` : ''}
         </div>
-        <div>
-          <span class="badge ${badgeClass}">${stLbl}</span>
+        <div style="text-align:right">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <div class="item-actions">
+            <button class="btn secondary small" onclick="editProduct('${item.id}')">Editar</button>
+            <button class="btn danger small" onclick="removeProduct('${item.id}')">Eliminar</button>
+          </div>
         </div>
       </div>
     `;
   }).join('');
 }
 
-function retireProduct(id){
-  if(confirm('¿Marcar este producto como retirado de góndola?')){
-    products=products.map(p=>p.id===id?{...p,retired:true,retiredBy:current.name,retiredAt:new Date().toISOString()}:p);
-    saveProducts();
-    toast('Producto retirado');
-    renderProducts();
-    update();
+function openProduct() {
+  $('editId').value = '';
+  $('productForm').reset();
+  $('maestroNotice').classList.add('hidden');
+  $('productTitle').textContent = 'Cargar vencimiento';
+  show('product');
+}
+
+function editProduct(id){
+  const item = products.find(x => x.id === id);
+  if(!item) return;
+  $('editId').value = item.id;
+  $('sku').value = item.sku || '';
+  $('description').value = item.description;
+  $('quantity').value = item.quantity;
+  $('expiry').value = item.expiry;
+  $('batch').value = item.batch || '';
+  $('sector').value = item.sector;
+  $('notes').value = item.notes || '';
+  $('productTitle').textContent = 'Editar vencimiento';
+  onSkuInput();
+  show('product');
+}
+
+async function removeProduct(id){
+  if(confirm('¿Estás seguro de eliminar este registro?')){
+    await deleteProductFromFirestore(id);
+    toast('Producto eliminado');
   }
 }
 
-function deleteProduct(id){
-  if(confirm('¿Eliminar definitivamente este registro?')){
-    products=products.filter(p=>p.id!==id);
-    saveProducts();
-    toast('Registro eliminado');
-    renderProducts();
-    update();
-  }
+function show(viewId){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = $(viewId);
+  if(target) target.classList.add('active');
+  window.scrollTo(0,0);
 }
 
-// Gestión de Usuarios (Con Firebase)
-function renderUsers(){
-  $('userList').innerHTML=users.map(u=>`
-    <div class="userrow ${!u.active?'inactive':''}">
+function renderUsers() {
+  const container = $('userList');
+  if (!container) return;
+
+  container.innerHTML = users.map(u => `
+    <div class="userrow ${u.active ? '' : 'inactive'}">
       <div>
         <strong>${esc(u.name)}</strong>
-        <div style="font-size:12px;color:var(--muted)">${u.role==='responsable'?(u.sectors?.join(', ')||'Sin sectores'):'Acceso global'}</div>
+        <div style="font-size:11px;color:var(--muted)">PIN: ${u.pin}</div>
       </div>
       <div><span class="role ${u.role}">${roleLabel(u.role)}</span></div>
-      <div><span class="badge ${u.active?'proximo':'vencido'}">${u.active?'Activo':'Desactivado'}</span></div>
-      <div>
+      <div><span style="font-size:12px;color:var(--muted)">${u.active ? 'Activo' : 'Desactivado'}</span></div>
+      <div style="display:flex;gap:6px">
         <button class="btn secondary small" onclick="openUser('${u.id}')">Editar</button>
+        <button class="btn ${u.active ? 'danger' : 'primary'} small" onclick="toggleUserActive('${u.id}')">${u.active ? 'Desactivar' : 'Activar'}</button>
       </div>
     </div>
   `).join('');
 }
 
-function toggleSectorAssignment(){
-  let r=$('userRole').value;
-  $('sectorAssignment').classList.toggle('hidden', r!=='responsable');
-}
+function openUser(id = null) {
+  $('userEditId').value = '';
+  $('userName').value = '';
+  $('userRole').value = 'encargado';
+  $('userPin').value = '2039';
+  $('userActive').value = 'true';
+  buildSectorChecks([]);
 
-function openUser(id=''){
-  $('userForm').reset();
-  $('userEditId').value='';
-  $('userTitle').textContent='Crear usuario';
-  toggleSectorAssignment();
-
-  if(id){
-    let u=users.find(x=>x.id===id);
-    if(u){
-      $('userEditId').value=u.id;
-      $('userName').value=u.name;
-      $('userRole').value=u.role;
-      $('userPin').value=u.pin;
-      $('userActive').value=String(u.active);
-      $('userTitle').textContent='Editar usuario';
-      toggleSectorAssignment();
-
-      if(u.role==='responsable'){
-        document.querySelectorAll('#sectorChecks input').forEach(ck=>{
-          ck.checked=(u.sectors||[]).includes(ck.value);
-        });
-      }
+  if (id) {
+    const u = users.find(x => x.id === id);
+    if (u) {
+      $('userEditId').value = u.id;
+      $('userName').value = u.name;
+      $('userRole').value = u.role;
+      $('userPin').value = u.pin;
+      $('userActive').value = String(u.active);
+      buildSectorChecks(u.sectors || []);
     }
+    $('userTitle').textContent = 'Editar usuario';
+  } else {
+    $('userTitle').textContent = 'Crear usuario';
   }
+  toggleSectorAssignment();
   show('userFormView');
 }
 
-$('userForm').onsubmit=async e=>{
+function buildSectorChecks(selectedSectors = []) {
+  const container = $('sectorChecks');
+  if (!container) return;
+  container.innerHTML = SECTORS.map(s => `
+    <label class="check">
+      <input type="checkbox" name="userSector" value="${esc(s)}" ${selectedSectors.includes(s) ? 'checked' : ''}>
+      ${esc(s)}
+    </label>
+  `).join('');
+}
+
+function toggleSectorAssignment() {
+  const role = $('userRole').value;
+  const assignment = $('sectorAssignment');
+  if (assignment) {
+    assignment.classList.toggle('hidden', role !== 'responsable');
+  }
+}
+
+document.getElementById('userForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  let id=$('userEditId').value,
-      name=$('userName').value.trim().toUpperCase(),
-      role=$('userRole').value,
-      pin=$('userPin').value.trim(),
-      active=$('userActive').value==='true';
+  const id = $('userEditId').value;
+  const name = $('userName').value.trim();
+  const role = $('userRole').value;
+  const pin = $('userPin').value.trim();
+  const active = $('userActive').value === 'true';
 
-  if(!/^\d{4}$/.test(pin)) return alert('El PIN debe tener exactamente 4 números.');
-
-  let selectedSectors=[];
-  if(role==='responsable'){
-    document.querySelectorAll('#sectorChecks input:checked').forEach(ck=>selectedSectors.push(ck.value));
+  if (!name || !pin || pin.length !== 4) {
+    toast('Completá el nombre y un PIN válido de 4 dígitos');
+    return;
   }
 
-  let docId = id || name.toLowerCase().replace(/\s+/g,'_');
-  let uObjCloud={
-    nombre: name,
-    pin: pin,
-    rol: role,
-    activo: active,
-    sectores: selectedSectors
-  };
-
-  try{
-    await db.collection('usuarios').doc(docId).set(uObjCloud, { merge: true });
-    toast(id?'Usuario actualizado en la nube ☁️':'Usuario creado en la nube ☁️');
-    await loadUsersFromCloud();
-    show('users');
-  }catch(err){
-    console.error("Error al guardar usuario en Firebase:", err);
-    alert("Error al guardar el usuario en la nube.");
+  let sectors = [];
+  if (role === 'responsable') {
+    sectors = Array.from(document.querySelectorAll('input[name="userSector"]:checked')).map(cb => cb.value);
   }
-};
 
-// Inicialización general
-window.addEventListener('DOMContentLoaded', async ()=>{
-  parseRoute();
-  fillSectors();
-  await loadUsersFromCloud();
+  let userData;
+  if (id) {
+    const u = users.find(x => x.id === id);
+    userData = { ...u, name, role, pin, active, sectors };
+  } else {
+    const newId = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Math.floor(Math.random() * 1000);
+    userData = { id: newId, name, role, pin, active, sectors };
+  }
 
-  let sess=sessionStorage.getItem(SK);
-  let u=users.find(x=>x.id===sess && x.active);
-  if(u){
-    applyUser(u);
+  await saveUserToFirestore(userData);
+  toast('Usuario guardado en la nube');
+  renderUsers();
+  show('users');
+});
+
+async function toggleUserActive(id) {
+  const u = users.find(x => x.id === id);
+  if (u) {
+    if (u.id === current.id && u.active) {
+      toast('No podés desactivar tu propia cuenta activa');
+      return;
+    }
+    u.active = !u.active;
+    await saveUserToFirestore(u);
+    toast('Estado de usuario actualizado');
+  }
+}
+
+function openAccount() {
+  if (!current) return;
+  $('profileAvatar').textContent = current.name.charAt(0).toUpperCase();
+  $('profileName').textContent = current.name;
+  $('profileRole').textContent = roleLabel(current.role);
+  $('profileSectors').textContent = current.sectors && current.sectors.length ? `Sectores: ${current.sectors.join(', ')}` : '';
+  show('account');
+}
+
+async function changeOwnPin() {
+  const newPin = prompt('Ingresá tu nuevo PIN de 4 números:');
+  if (newPin === null) return;
+  if (newPin.trim().length !== 4 || isNaN(newPin)) {
+    toast('El PIN debe tener exactamente 4 números');
+    return;
+  }
+  current.pin = newPin.trim();
+  await saveUserToFirestore(current);
+  toast('PIN actualizado correctamente');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initFirebaseSync();
+
+  const savedSession = JSON.parse(localStorage.getItem(SK) || 'null');
+  if (savedSession && savedSession.id) {
+    setTimeout(() => {
+      const found = users.find(u => u.id === savedSession.id && u.active);
+      if (found) {
+        current = found;
+        setupInterface();
+      }
+    }, 600);
   }
 });
 </script>
