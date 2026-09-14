@@ -8,6 +8,9 @@
 
 <!-- Librerías Externas -->
 <script src="https://unpkg.com/html5-qrcode"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
 <style>
 :root{--navy:#071a33;--navy2:#0d315d;--blue:#146bcc;--bg:#f1f5f9;--card:#fff;--text:#172033;--muted:#667085;--line:#d8e0ea;--red:#c62828;--orange:#ee6c00;--green:#16824a;--purple:#673ab7;--shadow:0 10px 30px rgba(13,35,65,.1)}
@@ -38,7 +41,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <div class="logo">V</div>
     <h1>Control de Vencimientos</h1>
     <div class="station">MAR DEL PLATA TEJEDOR</div>
-    <p class="sub" id="loginMessage">Seleccioná tu usuario e ingresá el PIN.</p>
+    <p class="sub" id="loginMessage">Cargando usuarios desde la nube...</p>
     <div class="field"><label>Usuario</label><select id="loginUser"></select></div>
     <div class="field"><label>PIN</label><input id="loginPin" class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
     <button class="login-btn" onclick="login()">Ingresar</button>
@@ -50,7 +53,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <div class="top-inner">
       <div class="brand">
         <h1>Control de Vencimientos</h1>
-        <small>MAR DEL PLATA TEJEDOR · v2.5 Auto-Catálogo</small>
+        <small>MAR DEL PLATA TEJEDOR · v2.5 Cloud Sync</small>
       </div>
       <div class="userbox">
         <div class="uinfo"><strong id="topName"></strong><span id="topRole"></span></div>
@@ -65,7 +68,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <section id="home" class="view active">
       <div class="welcome">
         <div><h2 id="greeting">Panel principal</h2><p>Registrá vencimientos y controlá los productos que requieren atención.</p></div>
-        <span class="sync">Guardado local</span>
+        <span class="sync">Sincronizado con Firebase ☁️</span>
       </div>
       <div class="actions">
         <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
@@ -150,7 +153,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
     <!-- Administrar Usuarios -->
     <section id="users" class="view">
       <div class="head"><h2>Administrar usuarios</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="notice">Disponible únicamente para supervisores. Los usuarios desactivados conservan su historial.</div>
+      <div class="notice">Disponible únicamente para supervisores. Los usuarios se sincronizan en tiempo real con Firebase.</div>
       <div class="card">
         <button class="btn primary" onclick="openUser()">＋ Crear usuario</button>
         <div id="userList" style="margin-top:15px"></div>
@@ -203,29 +206,45 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
 <div id="toast" class="toast"></div>
 
 <script>
+// --- CONFIGURACIÓN DE FIREBASE (Reemplaza con tus datos reales) ---
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN.firebaseapp.com",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE.appspot.com",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+
 const SECTORS=['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
-const UK='cv_users_v22',PK='cv_products_v22',SK='cv_session_v22',MK='cv_maestro_v22';
+const PK='cv_products_v22',SK='cv_session_v22',MK='cv_maestro_v22';
+
+let users=[];
+let products=JSON.parse(localStorage.getItem(PK)||'[]');
+let BASE_MAESTRO=JSON.parse(localStorage.getItem(MK)||'[]');
 
 let current=null,lockedSector='',pendingRoute={view:'home',sector:''};
 let html5QrCode=null;
 
-function defaults(){
+function defaultUsers(){
   return[
     {id:'diego',name:'DIEGO',pin:'2039',role:'supervisor',active:true,sectors:[]},
     {id:'yesica',name:'YESICA',pin:'2039',role:'supervisor',active:true,sectors:[]},
     {id:'lucas',name:'LUCAS',pin:'2039',role:'supervisor',active:true,sectors:[]},
     {id:'marcos',name:'MARCOS',pin:'2039',role:'encargado',active:true,sectors:[]},
     {id:'daiana',name:'DAIANA',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'agustin',name:'AGUSTIN',pin:'2039',role:'encargado',active:true,sectors:[]}
+    {id:'agustin',name:'AGUSTIN',pin:'2039',role:'encargado',active:true,sectors:[]},
+    {id:'lautaro',name:'LAUTARO',pin:'2039',role:'encargado',active:true,sectors:[]},
+    {id:'abril',name:'ABRIL',pin:'2039',role:'encargado',active:true,sectors:[]}
   ];
 }
 
-let users=JSON.parse(localStorage.getItem(UK)||'null')||defaults();
-let products=JSON.parse(localStorage.getItem(PK)||'[]');
-let BASE_MAESTRO=JSON.parse(localStorage.getItem(MK)||'[]');
-
 const $=x=>document.getElementById(x);
-const saveUsers=()=>localStorage.setItem(UK,JSON.stringify(users));
 const saveProducts=()=>localStorage.setItem(PK,JSON.stringify(products));
 const saveMaestro=()=>localStorage.setItem(MK,JSON.stringify(BASE_MAESTRO));
 
@@ -234,16 +253,49 @@ function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
 
-// Búsqueda y Verificación en Base Maestra (Escáner Físico / Cámara / Teclado)
+// Cargar usuarios desde Firestore ('usuarios')
+async function loadUsersFromCloud(){
+  try{
+    const snapshot=await db.collection('usuarios').get();
+    if(snapshot.empty){
+      // Si la colección está vacía, cargamos los usuarios por defecto en Firestore
+      const defs = defaultUsers();
+      for(let u of defs){
+        await db.collection('usuarios').doc(u.id).set({
+          nombre: u.name,
+          pin: u.pin,
+          rol: u.role,
+          activo: u.active,
+          sectores: u.sectors
+        });
+      }
+      users = defs;
+    }else{
+      users=[];
+      snapshot.forEach(doc=>{
+        let d = doc.data();
+        users.push({
+          id: doc.id,
+          name: d.nombre || '',
+          pin: d.pin || '',
+          role: d.rol || 'encargado',
+          active: d.activo !== undefined ? d.activo : true,
+          sectors: d.sectores || []
+        });
+      });
+    }
+  }catch(e){
+    console.error("Error cargando usuarios de Firestore:", e);
+    users = defaultUsers();
+  }
+  renderLogin();
+}
+
+// Búsqueda y Verificación en Maestro
 function onSkuInput(){
   const val=$('sku').value.trim();
   const notice=$('maestroNotice');
-
-  if(!val){
-    notice.classList.add('hidden');
-    return false;
-  }
-
+  if(!val){notice.classList.add('hidden');return false;}
   const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
   if(match){
     $('description').value=match.description;
@@ -255,7 +307,6 @@ function onSkuInput(){
   }
 }
 
-// Captura de eventos del escáner de pistola USB/Bluetooth (evita que el 'Enter' del lector envíe el formulario)
 window.addEventListener('DOMContentLoaded', ()=>{
   const skuInput = $('sku');
   if(skuInput){
@@ -263,11 +314,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
       if(e.key === 'Enter'){
         e.preventDefault();
         const existe = onSkuInput();
-        if(existe){
-          $('quantity').focus();
-        }else{
-          $('description').focus();
-        }
+        if(existe) $('quantity').focus();
+        else $('description').focus();
       }
     });
   }
@@ -284,11 +332,8 @@ function toggleCameraScanner(){
       $('sku').value=decodedText;
       const existe = onSkuInput();
       stopCameraScanner();
-      if(existe){
-        $('quantity').focus();
-      }else{
-        $('description').focus();
-      }
+      if(existe) $('quantity').focus();
+      else $('description').focus();
     },
     ()=>{}
   ).catch(err=>{
@@ -315,6 +360,7 @@ function parseRoute(){
   pendingRoute=found?{view:'product',sector:found}:view==='criticos'?{view:'critical',sector:''}:{view:'home',sector:''};
   if(found)$('loginMessage').textContent=`Ingresá para cargar un vencimiento en ${found}.`;
   else if(view==='criticos')$('loginMessage').textContent='Ingresá para consultar los productos críticos.';
+  else $('loginMessage').textContent='Seleccioná tu usuario e ingresá el PIN.';
 }
 
 function renderLogin(){
@@ -371,14 +417,19 @@ function openAccount(){
   show('account');
 }
 
-function changeOwnPin(){
+async function changeOwnPin(){
   let np=prompt('Ingresá tu nuevo PIN de 4 dígitos:');
   if(!np) return;
   if(!/^\d{4}$/.test(np)) return alert('El PIN debe contener exactamente 4 números.');
   current.pin=np;
-  users=users.map(u=>u.id===current.id?current:u);
-  saveUsers();
-  toast('PIN actualizado correctamente');
+  try{
+    await db.collection('usuarios').doc(current.id).update({ pin: np });
+    toast('PIN actualizado en la nube ☁️');
+    await loadUsersFromCloud();
+  }catch(e){
+    console.error(e);
+    alert('Error al actualizar el PIN en la nube.');
+  }
 }
 
 // Fechas y Estados
@@ -446,7 +497,6 @@ function openProduct(id='',qrSector=''){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   $('product').classList.add('active');
   window.scrollTo(0,0);
-  setTimeout(()=>$('sku').focus(), 100);
 }
 
 $('productForm').onsubmit=e=>{
@@ -456,14 +506,10 @@ $('productForm').onsubmit=e=>{
       descVal=$('description').value.trim(),
       old=products.find(p=>p.id===id);
 
-  // Incorporación / Actualización automática en el catálogo maestro
   if(skuVal && descVal){
-    let matchIdx=BASE_MAESTRO.findIndex(m=>String(m.sku)===skuVal);
-    if(matchIdx===-1){
+    let exists=BASE_MAESTRO.some(m=>String(m.sku)===skuVal);
+    if(!exists){
       BASE_MAESTRO.push({sku:skuVal, description:descVal});
-      saveMaestro();
-    }else if(BASE_MAESTRO[matchIdx].description!==descVal){
-      BASE_MAESTRO[matchIdx].description=descVal;
       saveMaestro();
     }
   }
@@ -557,7 +603,7 @@ function deleteProduct(id){
   }
 }
 
-// Gestión de Usuarios
+// Gestión de Usuarios (Con Firebase)
 function renderUsers(){
   $('userList').innerHTML=users.map(u=>`
     <div class="userrow ${!u.active?'inactive':''}">
@@ -606,7 +652,7 @@ function openUser(id=''){
   show('userFormView');
 }
 
-$('userForm').onsubmit=e=>{
+$('userForm').onsubmit=async e=>{
   e.preventDefault();
   let id=$('userEditId').value,
       name=$('userName').value.trim().toUpperCase(),
@@ -621,32 +667,31 @@ $('userForm').onsubmit=e=>{
     document.querySelectorAll('#sectorChecks input:checked').forEach(ck=>selectedSectors.push(ck.value));
   }
 
-  let uObj={
-    id: id || name.toLowerCase().replace(/\s+/g,'_'),
-    name: name,
+  let docId = id || name.toLowerCase().replace(/\s+/g,'_');
+  let uObjCloud={
+    nombre: name,
     pin: pin,
-    role: role,
-    active: active,
-    sectors: selectedSectors
+    rol: role,
+    activo: active,
+    sectores: selectedSectors
   };
 
-  if(id){
-    users=users.map(u=>u.id===id?uObj:u);
-  }else{
-    if(users.some(u=>u.id===uObj.id)) return alert('Ya existe un usuario con ese nombre.');
-    users.push(uObj);
+  try{
+    await db.collection('usuarios').doc(docId).set(uObjCloud, { merge: true });
+    toast(id?'Usuario actualizado en la nube ☁️':'Usuario creado en la nube ☁️');
+    await loadUsersFromCloud();
+    show('users');
+  }catch(err){
+    console.error("Error al guardar usuario en Firebase:", err);
+    alert("Error al guardar el usuario en la nube.");
   }
-
-  saveUsers();
-  toast(id?'Usuario actualizado':'Usuario creado');
-  show('users');
 };
 
-// Inicialización de la App
-window.addEventListener('DOMContentLoaded', ()=>{
+// Inicialización general
+window.addEventListener('DOMContentLoaded', async ()=>{
   parseRoute();
-  renderLogin();
   fillSectors();
+  await loadUsersFromCloud();
 
   let sess=sessionStorage.getItem(SK);
   let u=users.find(x=>x.id===sess && x.active);
