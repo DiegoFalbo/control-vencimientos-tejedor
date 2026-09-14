@@ -104,13 +104,13 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
           <input type="hidden" id="editId">
           <div class="grid">
             <div class="full">
-              <label>Código SKU / EAN</label>
+              <label>Código SKU / EAN (Escáner)</label>
               <div class="input-group">
                 <input id="sku" placeholder="Ingresá o escaneá el código" oninput="onSkuInput()" autocomplete="off">
-                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Escanear</button>
+                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Cámara</button>
               </div>
               <div id="maestroNotice" class="field-hint hidden">
-                ⚠️ SKU no registrado. Al guardar la carga se incorporará automáticamente al catálogo maestro.
+                ⚠️ Producto nuevo. Al guardar el vencimiento se registrará automáticamente en la base maestra.
               </div>
             </div>
             <div class="full"><label>Descripción *</label><input id="description" required placeholder="Nombre del producto"></div>
@@ -234,24 +234,44 @@ function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
 
-// Búsqueda y Verificación en Maestro
+// Búsqueda y Verificación en Base Maestra (Escáner Físico / Cámara / Teclado)
 function onSkuInput(){
   const val=$('sku').value.trim();
   const notice=$('maestroNotice');
 
   if(!val){
     notice.classList.add('hidden');
-    return;
+    return false;
   }
 
   const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
   if(match){
     $('description').value=match.description;
     notice.classList.add('hidden');
+    return true;
   }else{
     notice.classList.remove('hidden');
+    return false;
   }
 }
+
+// Captura de eventos del escáner de pistola USB/Bluetooth (evita que el 'Enter' del lector envíe el formulario)
+window.addEventListener('DOMContentLoaded', ()=>{
+  const skuInput = $('sku');
+  if(skuInput){
+    skuInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        const existe = onSkuInput();
+        if(existe){
+          $('quantity').focus();
+        }else{
+          $('description').focus();
+        }
+      }
+    });
+  }
+});
 
 // Escáner con Cámara
 function toggleCameraScanner(){
@@ -262,10 +282,13 @@ function toggleCameraScanner(){
     {fps:10,qrbox:{width:240,height:140}},
     (decodedText)=>{
       $('sku').value=decodedText;
-      onSkuInput();
+      const existe = onSkuInput();
       stopCameraScanner();
-      if($('description').value) $('expiry').focus();
-      else $('description').focus();
+      if(existe){
+        $('quantity').focus();
+      }else{
+        $('description').focus();
+      }
     },
     ()=>{}
   ).catch(err=>{
@@ -423,6 +446,7 @@ function openProduct(id='',qrSector=''){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   $('product').classList.add('active');
   window.scrollTo(0,0);
+  setTimeout(()=>$('sku').focus(), 100);
 }
 
 $('productForm').onsubmit=e=>{
@@ -432,11 +456,14 @@ $('productForm').onsubmit=e=>{
       descVal=$('description').value.trim(),
       old=products.find(p=>p.id===id);
 
-  // Incorporación automática al catálogo maestro
+  // Incorporación / Actualización automática en el catálogo maestro
   if(skuVal && descVal){
-    let exists=BASE_MAESTRO.some(m=>String(m.sku)===skuVal);
-    if(!exists){
+    let matchIdx=BASE_MAESTRO.findIndex(m=>String(m.sku)===skuVal);
+    if(matchIdx===-1){
       BASE_MAESTRO.push({sku:skuVal, description:descVal});
+      saveMaestro();
+    }else if(BASE_MAESTRO[matchIdx].description!==descVal){
+      BASE_MAESTRO[matchIdx].description=descVal;
       saveMaestro();
     }
   }
