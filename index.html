@@ -3,43 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Vencimientos - YPF Full</title>
-    <!-- Estilos y librerías opcionales según tu proyecto -->
+    <title>Control de Vencimientos - YPF Full Tejedor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --ypf-red: #e30613;
+            --ypf-blue: #002D62;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
+            background-color: #f8f9fa;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .navbar-ypf {
+            background-color: var(--ypf-blue);
+            color: white;
         }
-        h1 {
-            color: #e30613; /* Rojo YPF */
+        .btn-ypf {
+            background-color: var(--ypf-red);
+            color: white;
+        }
+        .btn-ypf:hover {
+            background-color: #c20510;
+            color: white;
+        }
+        .badge-sector {
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
 
+    <!-- Navbar -->
+    <nav class="navbar navbar-ypf mb-4 shadow-sm">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 text-white">
+                <i class="fas fa-boxes-stacked me-2"></i> Control de Vencimientos | YPF Full Tejedor
+            </span>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+                <i class="fas fa-plus me-1"></i> Registrar Vencimiento
+            </button>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
     <div class="container">
-        <h1>Control de Vencimientos - Tejedor</h1>
-        <p>Sistema operativo de gestión y control de stock.</p>
-        <div id="app">
-            <!-- Tu interfaz y tablas dinámicas se cargan aquí -->
+        <!-- Filtros y Buscador -->
+        <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+                <input type="text" id="buscador" class="form-control" placeholder="Buscar por descripción o SKU..." onkeyup="filtrarDatos()">
+            </div>
+            <div class="col-md-6 mb-2 text-md-end">
+                <button class="btn btn-outline-secondary btn-sm" onclick="exportarExcel()">
+                    <i class="fas fa-file-excel me-1"></i> Exportar Maestro
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de Registros -->
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>SKU</th>
+                                <th>Descripción</th>
+                                <th>Sector</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaProductos">
+                            <!-- Los datos se cargan dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Modal Registrar / Editar -->
+    <div class="modal fade" id="modalAgregar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Gestión de Producto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formProducto">
+                        <div class="mb-3">
+                            <label class="form-label">SKU</label>
+                            <input type="text" id="inputSku" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <input type="text" id="inputDesc" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sector</label>
+                            <select id="inputSector" class="form-select">
+                                <option value="GONDOLAS">GONDOLAS</option>
+                                <option value="CARAMELERA">CARAMELERA</option>
+                                <option value="HELADOS">HELADOS</option>
+                                <option value="HELADERA EXHIBIDORA">HELADERA EXHIBIDORA</option>
+                                <option value="DEPOSITO GALLETITAS">DEPOSITO GALLETITAS</option>
+                                <option value="INSUMOS">INSUMOS</option>
+                                <option value="FULL">FULL</option>
+                                <option value="COCINA">COCINA</option>
+                                <option value="MOSTRADOR">MOSTRADOR</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-ypf w-100">Guardar Producto</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Claves de almacenamiento
+        // Claves de almacenamiento y control de versión
         const MK = 'ypf_maestro_productos';
         const MK_VERSION_KEY = 'ypf_maestro_version';
-        const CURRENT_VERSION = '2.0'; // Incrementá esto si modificás la lista en el futuro para actualizar automáticamente
+        const CURRENT_VERSION = '2.0'; 
 
         function defaultMaestro(){
           return [
@@ -477,17 +567,93 @@
           ];
         }
 
-        // Lógica de sincronización automática de versión en localStorage
+        // Sincronización automática de versión en localStorage
         let storedVersion = localStorage.getItem(MK_VERSION_KEY);
-        let BASE_MAESTRO;
+        let productos = [];
 
         if (storedVersion !== CURRENT_VERSION) {
-            BASE_MAESTRO = defaultMaestro();
-            localStorage.setItem(MK, JSON.stringify(BASE_MAESTRO));
+            productos = defaultMaestro();
+            localStorage.setItem(MK, JSON.stringify(productos));
             localStorage.setItem(MK_VERSION_KEY, CURRENT_VERSION);
         } else {
-            BASE_MAESTRO = JSON.parse(localStorage.getItem(MK)) || defaultMaestro();
+            productos = JSON.parse(localStorage.getItem(MK)) || defaultMaestro();
         }
+
+        // Renderizar tabla
+        function cargarTabla(data = productos) {
+            const tbody = document.getElementById('tablaProductos');
+            tbody.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${item.sku}</code></td>
+                        <td>${item.description}</td>
+                        <td><span class="badge bg-secondary badge-sector">${item.sector}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Filtrar buscador
+        function filtrarDatos() {
+            const texto = document.getElementById('buscador').value.toLowerCase();
+            const filtrados = productos.filter(p => 
+                p.description.toLowerCase().includes(texto) || p.sku.toLowerCase().includes(texto)
+            );
+            cargarTabla(filtrados);
+        }
+
+        // Guardar nuevo producto desde el modal
+        document.getElementById('formProducto').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nuevo = {
+                sku: document.getElementById('inputSku').value,
+                description: document.getElementById('inputDesc').value,
+                sector: document.getElementById('inputSector').value
+            };
+            productos.push(nuevo);
+            localStorage.setItem(MK, JSON.stringify(productos));
+            cargarTabla();
+            
+            // Cerrar modal y limpiar formulario
+            const modalEl = document.getElementById('modalAgregar');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            this.reset();
+        });
+
+        // Eliminar producto
+        function eliminarProducto(index) {
+            if(confirm('¿Estás seguro de eliminar este producto del maestro?')) {
+                productos.splice(index, 1);
+                localStorage.setItem(MK, JSON.stringify(productos));
+                cargarTabla();
+            }
+        }
+
+        // Exportar a CSV (Compatible con Excel)
+        function exportarExcel() {
+            let csvContent = "data:text/csv;charset=utf-8,SKU,Descripcion,Sector\n";
+            productos.forEach(function(rowArray) {
+                csvContent += `"${rowArray.sku}","${rowArray.description}","${rowArray.sector}"\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "maestro_productos_tejedor.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Inicializar vista
+        cargarTabla();
     </script>
 </body>
 </html>
