@@ -204,15 +204,15 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
 
 <script>
 // ==========================================
-// CONFIGURACIÓN DE FIREBASE (Reemplaza con tus datos reales)
+// CONFIGURACIÓN DE FIREBASE (Tus credenciales reales)
 // ==========================================
 const firebaseConfig = {
-  apiKey: "TU_API_KEY_AQUI",
-  authDomain: "tu-proyecto.firebaseapp.com",
-  projectId: "tu-proyecto",
-  storageBucket: "tu-proyecto.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyD1M2MbISGNYxUgVkn9ER8VaWOeStQMZfw",
+  authDomain: "control-vencimientos-tej-be16d.firebaseapp.com",
+  projectId: "control-vencimientos-tej-be16d",
+  storageBucket: "control-vencimientos-tej-be16d.firebasestorage.app",
+  messagingSenderId: "999397504244",
+  appId: "1:999397504244:web:558ff48b752db8d8aa9aa1"
 };
 
 // Inicializar Firebase
@@ -456,19 +456,24 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
     updatedBy: current.name
   };
 
-  if(id) {
-    productData.id = id;
-    await saveProductToFirestore(productData);
-    toast('Producto actualizado en la nube');
-  } else {
-    await saveProductToFirestore(productData);
-    toast('Vencimiento registrado con éxito');
-  }
+  try {
+    if(id) {
+      productData.id = id;
+      await saveProductToFirestore(productData);
+      toast('Producto actualizado en la nube');
+    } else {
+      await saveProductToFirestore(productData);
+      toast('Vencimiento registrado con éxito');
+    }
 
-  $('productForm').reset();
-  $('editId').value = '';
-  $('maestroNotice').classList.add('hidden');
-  show('home');
+    $('productForm').reset();
+    $('editId').value = '';
+    $('maestroNotice').classList.add('hidden');
+    show('home');
+  } catch (error) {
+    console.error("Error al guardar producto:", error);
+    toast('Error: ' + error.message);
+  }
 });
 
 function renderMetrics(){
@@ -574,8 +579,13 @@ function editProduct(id){
 
 async function removeProduct(id){
   if(confirm('¿Estás seguro de eliminar este registro?')){
-    await deleteProductFromFirestore(id);
-    toast('Producto eliminado');
+    try {
+      await deleteProductFromFirestore(id);
+      toast('Producto eliminado');
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
+      toast('Error: ' + error.message);
+    }
   }
 }
 
@@ -678,10 +688,15 @@ document.getElementById('userForm').addEventListener('submit', async (e) => {
     userData = { id: newId, name, role, pin, active, sectors };
   }
 
-  await saveUserToFirestore(userData);
-  toast('Usuario guardado en la nube');
-  renderUsers();
-  show('users');
+  try {
+    await saveUserToFirestore(userData);
+    toast('Usuario guardado en la nube');
+    renderUsers();
+    show('users');
+  } catch (error) {
+    console.error("Error al guardar usuario:", error);
+    toast('Error: ' + error.message);
+  }
 });
 
 async function toggleUserActive(id) {
@@ -692,8 +707,13 @@ async function toggleUserActive(id) {
       return;
     }
     u.active = !u.active;
-    await saveUserToFirestore(u);
-    toast('Estado de usuario actualizado');
+    try {
+      await saveUserToFirestore(u);
+      toast('Estado de usuario actualizado');
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+      toast('Error: ' + error.message);
+    }
   }
 }
 
@@ -714,8 +734,13 @@ async function changeOwnPin() {
     return;
   }
   current.pin = newPin.trim();
-  await saveUserToFirestore(current);
-  toast('PIN actualizado correctamente');
+  try {
+    await saveUserToFirestore(current);
+    toast('PIN actualizado correctamente');
+  } catch (error) {
+    console.error("Error al actualizar PIN:", error);
+    toast('Error: ' + error.message);
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
