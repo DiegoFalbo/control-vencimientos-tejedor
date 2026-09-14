@@ -104,13 +104,13 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
           <input type="hidden" id="editId">
           <div class="grid">
             <div class="full">
-              <label>Código SKU / EAN</label>
+              <label>Código SKU / EAN (Escáner)</label>
               <div class="input-group">
                 <input id="sku" placeholder="Ingresá o escaneá el código" oninput="onSkuInput()" autocomplete="off">
-                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Escanear</button>
+                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Cámara</button>
               </div>
               <div id="maestroNotice" class="field-hint hidden">
-                ⚠️ SKU no registrado. Al guardar la carga se incorporará automáticamente al catálogo maestro.
+                ⚠️ Producto nuevo. Al guardar el vencimiento se registrará automáticamente en la base maestra.
               </div>
             </div>
             <div class="full"><label>Descripción *</label><input id="description" required placeholder="Nombre del producto"></div>
@@ -234,24 +234,44 @@ function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
 
-// Búsqueda y Verificación en Maestro
+// Búsqueda y Verificación en Base Maestra (Escáner Físico / Cámara / Teclado)
 function onSkuInput(){
   const val=$('sku').value.trim();
   const notice=$('maestroNotice');
 
   if(!val){
     notice.classList.add('hidden');
-    return;
+    return false;
   }
 
   const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
   if(match){
     $('description').value=match.description;
     notice.classList.add('hidden');
+    return true;
   }else{
     notice.classList.remove('hidden');
+    return false;
   }
 }
+
+// Captura de eventos del escáner de pistola USB/Bluetooth (evita que el 'Enter' del lector envíe el formulario)
+window.addEventListener('DOMContentLoaded', ()=>{
+  const skuInput = $('sku');
+  if(skuInput){
+    skuInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        const existe = onSkuInput();
+        if(existe){
+          $('quantity').focus();
+        }else{
+          $('description').focus();
+        }
+      }
+    });
+  }
+});
 
 // Escáner con Cámara
 function toggleCameraScanner(){
@@ -262,10 +282,13 @@ function toggleCameraScanner(){
     {fps:10,qrbox:{width:240,height:140}},
     (decodedText)=>{
       $('sku').value=decodedText;
-      onSkuInput();
+      const existe = onSkuInput();
       stopCameraScanner();
-      if($('description').value) $('expiry').focus();
-      else $('description').focus();
+      if(existe){
+        $('quantity').focus();
+      }else{
+        $('description').focus();
+      }
     },
     ()=>{}
   ).catch(err=>{
@@ -288,4 +311,349 @@ function stopCameraScanner(){
 // Navegación y Sesión
 function parseRoute(){
   let p=new URLSearchParams(location.search),sector=(p.get('sector')||'').trim(),view=(p.get('vista')||'').toLowerCase();
-  let found=SECTORS.find(s=>s.toLowerCase()===
+  let found=SECTORS.find(s=>s.toLowerCase()===sector.toLowerCase());
+  pendingRoute=found?{view:'product',sector:found}:view==='criticos'?{view:'critical',sector:''}:{view:'home',sector:''};
+  if(found)$('loginMessage').textContent=`Ingresá para cargar un vencimiento en ${found}.`;
+  else if(view==='criticos')$('loginMessage').textContent='Ingresá para consultar los productos críticos.';
+}
+
+function renderLogin(){
+  $('loginUser').innerHTML='<option value="">Seleccionar usuario</option>'+users.filter(u=>u.active).map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');
+}
+
+function applyUser(u){
+  current=u;
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('topName').textContent=u.name;
+  $('topRole').textContent=roleLabel(u.role);
+  $('avatar').textContent=u.name[0];
+  $('greeting').textContent=`Hola, ${u.name}`;
+  $('adminButton').classList.toggle('hidden',u.role!=='supervisor');
+  fillSectors();
+  update();
+  if(pendingRoute.view==='product') openProduct('',pendingRoute.sector);
+  else show(pendingRoute.view);
+}
+
+function login(){
+  let u=users.find(x=>x.id===$('loginUser').value&&x.active);
+  if(!u||$('loginPin').value!==u.pin)return alert('Usuario o PIN incorrecto.');
+  sessionStorage.setItem(SK,u.id);
+  $('loginPin').value='';
+  applyUser(u);
+}
+
+function logout(){
+  sessionStorage.removeItem(SK);
+  current=null;
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  renderLogin();
+}
+
+function show(id){
+  if(id==='users'&&current?.role!=='supervisor')return;
+  lockedSector='';
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='critical')renderProducts();
+  if(id==='users')renderUsers();
+  if(id==='home')update();
+}
+
+function openAccount(){
+  $('profileAvatar').textContent=current.name[0];
+  $('profileName').textContent=current.name;
+  $('profileRole').textContent=`Rol: ${roleLabel(current.role)}`;
+  $('profileSectors').textContent=current.role==='responsable'?`Sectores: ${current.sectors?.join(', ')||'Sin sectores asignados'}`:'Acceso general a sectores';
+  show('account');
+}
+
+function changeOwnPin(){
+  let np=prompt('Ingresá tu nuevo PIN de 4 dígitos:');
+  if(!np) return;
+  if(!/^\d{4}$/.test(np)) return alert('El PIN debe contener exactamente 4 números.');
+  current.pin=np;
+  users=users.map(u=>u.id===current.id?current:u);
+  saveUsers();
+  toast('PIN actualizado correctamente');
+}
+
+// Fechas y Estados
+function dateDays(s){
+  let[y,m,d]=s.split('-').map(Number),x=new Date(y,m-1,d),t=new Date();
+  x.setHours(0,0,0,0);t.setHours(0,0,0,0);
+  return Math.round((x-t)/86400000);
+}
+
+function state(p){
+  if(p.retired)return'retirado';
+  let n=dateDays(p.expiry);
+  return n<0?'vencido':n<=15?'critico':n<=30?'proximo':'normal';
+}
+
+function stateText(p){
+  let s=state(p),n=dateDays(p.expiry);
+  if(s==='vencido')return `Vencido hace ${Math.abs(n)} días`;
+  if(s==='critico')return n===0?'Vence hoy':`Vence en ${n} días`;
+  if(s==='proximo')return `Vence en ${n} días`;
+  return'Normal';
+}
+
+function update(){
+  let a=products.filter(p=>!p.retired);
+  $('mv').textContent=a.filter(p=>state(p)==='vencido').length;
+  $('mc').textContent=a.filter(p=>state(p)==='critico').length;
+  $('mp').textContent=a.filter(p=>state(p)==='proximo').length;
+  $('mt').textContent=a.length;
+}
+
+function fillSectors(){
+  let o='<option value="">Seleccionar sector</option>'+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
+  $('sector').innerHTML=o;
+  $('sectorFilter').innerHTML='<option value="">Todos los sectores</option>'+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
+  $('sectorChecks').innerHTML=SECTORS.map(s=>`<label class="check"><input type="checkbox" value="${s}"> ${s}</label>`).join('');
+}
+
+// Formulario de Producto
+function openProduct(id='',qrSector=''){
+  $('productForm').reset();
+  $('quantity').value=1;
+  $('editId').value='';
+  $('sku').value='';
+  $('maestroNotice').classList.add('hidden');
+  $('productTitle').textContent='Cargar vencimiento';
+  lockedSector=qrSector||'';
+  $('sector').disabled=false;
+  $('sectorBanner').classList.add('hidden');
+
+  if(id){
+    let p=products.find(x=>x.id===id);
+    if(p){
+      ['sku','description','quantity','expiry','batch','sector','notes'].forEach(k=>$(k).value=p[k]||'');
+      $('editId').value=id;
+      $('productTitle').textContent='Editar vencimiento';
+      onSkuInput();
+    }
+  }else if(lockedSector){
+    $('sector').value=lockedSector;
+    $('sector').disabled=true;
+    $('sectorBanner').textContent=`Cargando producto en: ${lockedSector}`;
+    $('sectorBanner').classList.remove('hidden');
+  }
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  $('product').classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(()=>$('sku').focus(), 100);
+}
+
+$('productForm').onsubmit=e=>{
+  e.preventDefault();
+  let id=$('editId').value,
+      skuVal=$('sku').value.trim(),
+      descVal=$('description').value.trim(),
+      old=products.find(p=>p.id===id);
+
+  // Incorporación / Actualización automática en el catálogo maestro
+  if(skuVal && descVal){
+    let matchIdx=BASE_MAESTRO.findIndex(m=>String(m.sku)===skuVal);
+    if(matchIdx===-1){
+      BASE_MAESTRO.push({sku:skuVal, description:descVal});
+      saveMaestro();
+    }else if(BASE_MAESTRO[matchIdx].description!==descVal){
+      BASE_MAESTRO[matchIdx].description=descVal;
+      saveMaestro();
+    }
+  }
+
+  let p={
+    id:id||uid(),
+    sku:skuVal,
+    description:descVal,
+    quantity:+$('quantity').value,
+    expiry:$('expiry').value,
+    batch:$('batch').value.trim(),
+    sector:lockedSector||$('sector').value,
+    notes:$('notes').value.trim(),
+    retired:old?.retired||false,
+    createdBy:old?.createdBy||current.name,
+    createdAt:old?.createdAt||new Date().toISOString(),
+    updatedBy:current.name,
+    updatedAt:new Date().toISOString()
+  };
+
+  products=id?products.map(x=>x.id===id?p:x):[...products,p];
+  saveProducts();
+  toast(id?'Producto actualizado':'Vencimiento registrado');
+  show('home');
+};
+
+// Renderizado de Lista de Productos Críticos
+function renderProducts(){
+  let q=$('search').value.toLowerCase().trim(),
+      st=$('stateFilter').value,
+      sec=$('sectorFilter').value;
+
+  let list=products.filter(p=>{
+    if(p.retired) return false;
+    let matchQ=!q || (p.description&&p.description.toLowerCase().includes(q)) || (p.sku&&p.sku.toLowerCase().includes(q)) || (p.batch&&p.batch.toLowerCase().includes(q));
+    let matchSt=!st || state(p)===st;
+    let matchSec=!sec || p.sector===sec;
+    return matchQ && matchSt && matchSec;
+  });
+
+  if(!list.length){
+    $('productList').innerHTML='<div class="empty">No se encontraron productos registrados.</div>';
+    return;
+  }
+
+  $('productList').innerHTML=list.map(p=>{
+    let s=state(p), stLbl=stateText(p);
+    let badgeClass=s==='vencido'?'vencido':s==='critico'?'critico':s==='proximo'?'proximo':'';
+    return `
+      <div class="item">
+        <div>
+          <h3>${esc(p.description)} ${p.sku?`<span class="badge-sku">SKU: ${esc(p.sku)}</span>`:''}</h3>
+          <div class="meta">
+            <span><strong>Cant:</strong> ${p.quantity}</span>
+            <span><strong>Vence:</strong> ${p.expiry}</span>
+            <span><strong>Sector:</strong> ${esc(p.sector)}</span>
+            ${p.batch?`<span><strong>Lote:</strong> ${esc(p.batch)}</span>`:''}
+            ${p.notes?`<span><strong>Obs:</strong> ${esc(p.notes)}</span>`:''}
+          </div>
+          <div class="item-actions">
+            <button class="btn secondary small" onclick="openProduct('${p.id}')">Editar</button>
+            <button class="btn danger small" onclick="retireProduct('${p.id}')">Retirar de Góndola</button>
+            ${current.role==='supervisor'?`<button class="btn secondary small" onclick="deleteProduct('${p.id}')">Eliminar</button>`:''}
+          </div>
+        </div>
+        <div>
+          <span class="badge ${badgeClass}">${stLbl}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function retireProduct(id){
+  if(confirm('¿Marcar este producto como retirado de góndola?')){
+    products=products.map(p=>p.id===id?{...p,retired:true,retiredBy:current.name,retiredAt:new Date().toISOString()}:p);
+    saveProducts();
+    toast('Producto retirado');
+    renderProducts();
+    update();
+  }
+}
+
+function deleteProduct(id){
+  if(confirm('¿Eliminar definitivamente este registro?')){
+    products=products.filter(p=>p.id!==id);
+    saveProducts();
+    toast('Registro eliminado');
+    renderProducts();
+    update();
+  }
+}
+
+// Gestión de Usuarios
+function renderUsers(){
+  $('userList').innerHTML=users.map(u=>`
+    <div class="userrow ${!u.active?'inactive':''}">
+      <div>
+        <strong>${esc(u.name)}</strong>
+        <div style="font-size:12px;color:var(--muted)">${u.role==='responsable'?(u.sectors?.join(', ')||'Sin sectores'):'Acceso global'}</div>
+      </div>
+      <div><span class="role ${u.role}">${roleLabel(u.role)}</span></div>
+      <div><span class="badge ${u.active?'proximo':'vencido'}">${u.active?'Activo':'Desactivado'}</span></div>
+      <div>
+        <button class="btn secondary small" onclick="openUser('${u.id}')">Editar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSectorAssignment(){
+  let r=$('userRole').value;
+  $('sectorAssignment').classList.toggle('hidden', r!=='responsable');
+}
+
+function openUser(id=''){
+  $('userForm').reset();
+  $('userEditId').value='';
+  $('userTitle').textContent='Crear usuario';
+  toggleSectorAssignment();
+
+  if(id){
+    let u=users.find(x=>x.id===id);
+    if(u){
+      $('userEditId').value=u.id;
+      $('userName').value=u.name;
+      $('userRole').value=u.role;
+      $('userPin').value=u.pin;
+      $('userActive').value=String(u.active);
+      $('userTitle').textContent='Editar usuario';
+      toggleSectorAssignment();
+
+      if(u.role==='responsable'){
+        document.querySelectorAll('#sectorChecks input').forEach(ck=>{
+          ck.checked=(u.sectors||[]).includes(ck.value);
+        });
+      }
+    }
+  }
+  show('userFormView');
+}
+
+$('userForm').onsubmit=e=>{
+  e.preventDefault();
+  let id=$('userEditId').value,
+      name=$('userName').value.trim().toUpperCase(),
+      role=$('userRole').value,
+      pin=$('userPin').value.trim(),
+      active=$('userActive').value==='true';
+
+  if(!/^\d{4}$/.test(pin)) return alert('El PIN debe tener exactamente 4 números.');
+
+  let selectedSectors=[];
+  if(role==='responsable'){
+    document.querySelectorAll('#sectorChecks input:checked').forEach(ck=>selectedSectors.push(ck.value));
+  }
+
+  let uObj={
+    id: id || name.toLowerCase().replace(/\s+/g,'_'),
+    name: name,
+    pin: pin,
+    role: role,
+    active: active,
+    sectors: selectedSectors
+  };
+
+  if(id){
+    users=users.map(u=>u.id===id?uObj:u);
+  }else{
+    if(users.some(u=>u.id===uObj.id)) return alert('Ya existe un usuario con ese nombre.');
+    users.push(uObj);
+  }
+
+  saveUsers();
+  toast(id?'Usuario actualizado':'Usuario creado');
+  show('users');
+};
+
+// Inicialización de la App
+window.addEventListener('DOMContentLoaded', ()=>{
+  parseRoute();
+  renderLogin();
+  fillSectors();
+
+  let sess=sessionStorage.getItem(SK);
+  let u=users.find(x=>x.id===sess && x.active);
+  if(u){
+    applyUser(u);
+  }
+});
+</script>
+</body>
+</html>
