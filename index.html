@@ -104,13 +104,13 @@ main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.vie
           <input type="hidden" id="editId">
           <div class="grid">
             <div class="full">
-              <label>Código SKU / EAN (Escáner)</label>
+              <label>Código SKU / EAN</label>
               <div class="input-group">
                 <input id="sku" placeholder="Ingresá o escaneá el código" oninput="onSkuInput()" autocomplete="off">
-                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Cámara</button>
+                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Escanear</button>
               </div>
               <div id="maestroNotice" class="field-hint hidden">
-                ⚠️ Producto nuevo. Al guardar el vencimiento se registrará automáticamente en la base maestra.
+                ⚠️ SKU no registrado. Al guardar la carga se incorporará automáticamente al catálogo maestro.
               </div>
             </div>
             <div class="full"><label>Descripción *</label><input id="description" required placeholder="Nombre del producto"></div>
@@ -234,44 +234,24 @@ function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
 function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
 
-// Búsqueda y Verificación en Base Maestra (Escáner Físico / Cámara / Teclado)
+// Búsqueda y Verificación en Maestro
 function onSkuInput(){
   const val=$('sku').value.trim();
   const notice=$('maestroNotice');
 
   if(!val){
     notice.classList.add('hidden');
-    return false;
+    return;
   }
 
   const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
   if(match){
     $('description').value=match.description;
     notice.classList.add('hidden');
-    return true;
   }else{
     notice.classList.remove('hidden');
-    return false;
   }
 }
-
-// Captura de eventos del escáner de pistola USB/Bluetooth (evita que el 'Enter' del lector envíe el formulario)
-window.addEventListener('DOMContentLoaded', ()=>{
-  const skuInput = $('sku');
-  if(skuInput){
-    skuInput.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        const existe = onSkuInput();
-        if(existe){
-          $('quantity').focus();
-        }else{
-          $('description').focus();
-        }
-      }
-    });
-  }
-});
 
 // Escáner con Cámara
 function toggleCameraScanner(){
@@ -282,372 +262,30 @@ function toggleCameraScanner(){
     {fps:10,qrbox:{width:240,height:140}},
     (decodedText)=>{
       $('sku').value=decodedText;
-      const existe = onSkuInput();
+      onSkuInput();
       stopCameraScanner();
-      if(existe){
-        $('quantity').focus();
-      }else{
-        $('description').focus();
-      }
+      if($('description').value) $('expiry').focus();
+      else $('description').focus();
     },
     ()=>{}
-  ).catch(err => {
-    toast("No se pudo acceder a la cámara");
-    $('camera-modal').style.display='none';
+  ).catch(err=>{
+    alert("No se pudo iniciar la cámara: "+err);
+    stopCameraScanner();
   });
 }
 
 function stopCameraScanner(){
-  if(html5QrCode){
+  if(html5QrCode && html5QrCode.isScanning){
     html5QrCode.stop().then(()=>{
+      html5QrCode.clear();
       $('camera-modal').style.display='none';
-    }).catch(()=>{
-      $('camera-modal').style.display='none';
-    });
+    }).catch(()=>{ $('camera-modal').style.display='none'; });
   }else{
     $('camera-modal').style.display='none';
   }
 }
 
-// Gestión de productos
-function openProduct(id='', sector=''){
-  $('editId').value=id;
-  $('productForm').reset();
-  $('maestroNotice').classList.add('hidden');
-  
-  if(id){
-    $('productTitle').textContent='Editar vencimiento';
-    const p=products.find(x=>x.id===id);
-    if(p){
-      $('sku').value=p.sku||'';
-      $('description').value=p.description||'';
-      $('quantity').value=p.quantity||1;
-      $('expiry').value=p.expiry||'';
-      $('batch').value=p.batch||'';
-      $('sector').value=p.sector||SECTORS[0];
-      $('notes').value=p.notes||'';
-    }
-  }else{
-    $('productTitle').textContent='Cargar vencimiento';
-    if(sector){
-      $('sector').value=sector;
-    } else if(lockedSector){
-      $('sector').value=lockedSector;
-    }
-  }
-  show('product');
-}
-
-// Guardar producto
-document.getElementById('productForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const id=$('editId').value;
-  const sku=$('sku').value.trim();
-  const description=$('description').value.trim();
-  const quantity=parseInt($('quantity').value)||1;
-  const expiry=$('expiry').value;
-  const batch=$('batch').value.trim();
-  const sector=$('sector').value;
-  const notes=$('notes').value.trim();
-
-  if(!description || !expiry || !sector){
-    toast('Completá los campos obligatorios');
-    return;
-  }
-
-  // Si hay SKU y no está en el maestro, lo agregamos automáticamente (Auto-Catálogo)
-  if(sku && !BASE_MAESTRO.some(item => String(item.sku) === sku)){
-    BASE_MAESTRO.push({ sku, description, sector });
-    saveMaestro();
-  }
-
-  if(id){
-    const p=products.find(x=>x.id===id);
-    if(p){
-      p.sku=sku; p.description=description; p.quantity=quantity; p.expiry=expiry; p.batch=batch; p.sector=sector; p.notes=notes;
-    }
-    toast('Vencimiento actualizado');
-  }else{
-    products.push({
-      id: uid(),
-      sku, description, quantity, expiry, batch, sector, notes,
-      dateAdded: new Date().toISOString()
-    });
-    toast('Vencimiento registrado');
-  }
-
-  saveProducts();
-  updateMetrics();
-  show('home');
-});
-
-// Cálculos de estado de vencimiento
-function getStatus(expiryDate){
-  const today=new Date();
-  today.setHours(0,0,0,0);
-  const exp=new Date(expiryDate+'T00:00:00');
-  const diffTime=exp-today;
-  const diffDays=Math.ceil(diffTime/(1000*60*60*24));
-
-  if(diffDays<0) return 'vencido';
-  if(diffDays<=15) return 'critico';
-  if(diffDays<=30) return 'proximo';
-  return 'ok';
-}
-
-function updateMetrics(){
-  let v=0, c=0, p=0, t=products.length;
-  products.forEach(prod=>{
-    const st=getStatus(prod.expiry);
-    if(st==='vencido') v++;
-    else if(st==='critico') c++;
-    else if(st==='proximo') p++;
-  });
-  $('mv').textContent=v;
-  $('mc').textContent=c;
-  $('mp').textContent=p;
-  $('mt').textContent=t;
-}
-
-// Renderizado de productos
-function renderProducts(){
-  const list=$('productList');
-  const search=$('search').value.toLowerCase();
-  const stateFilter=$('stateFilter').value;
-  const sectorFilter=$('sectorFilter').value;
-
-  let html='';
-  const filtered=products.filter(p=>{
-    const st=getStatus(p.expiry);
-    const matchSearch=p.description.toLowerCase().includes(search) || (p.sku && p.sku.toLowerCase().includes(search));
-    const matchState= !stateFilter || st===stateFilter;
-    const matchSector= !sectorFilter || p.sector===sectorFilter;
-    return matchSearch && matchState && matchSector;
-  });
-
-  if(filtered.length===0){
-    list.innerHTML='<div class="empty">No se encontraron productos registrados.</div>';
-    return;
-  }
-
-  filtered.forEach(p=>{
-    const st=getStatus(p.expiry);
-    let badgeText='', badgeClass='';
-    if(st==='vencido'){badgeText='VENCIDO'; badgeClass='vencido';}
-    else if(st==='critico'){badgeText='CRÍTICO (≤15 días)'; badgeClass='critico';}
-    else if(st==='proximo'){badgeText='PRÓXIMO (16-30 días)'; badgeClass='proximo';}
-    else{badgeText='EN VIGOR'; badgeClass='proximo';}
-
-    html+=`
-      <div class="item">
-        <div>
-          <h3>${esc(p.description)}</h3>
-          <div class="meta">
-            ${p.sku?`<span class="badge-sku">SKU: ${esc(p.sku)}</span>`:''}
-            <span>Sector: <strong>${esc(p.sector)}</strong></span>
-            <span>Cant: <strong>${p.quantity}</strong></span>
-            <span>Vence: <strong>${p.expiry}</strong></span>
-            ${p.batch?`<span>Lote: ${esc(p.batch)}</span>`:''}
-          </div>
-          ${p.notes?`<p style="margin:6px 0 0;font-size:12px;color:var(--muted);">${esc(p.notes)}</p>`:''}
-        </div>
-        <div style="text-align:right">
-          <span class="badge ${badgeClass}">${badgeText}</span>
-          <div class="item-actions">
-            <button class="btn secondary small" onclick="openProduct('${p.id}')">Editar</button>
-            <button class="btn danger small" onclick="deleteProduct('${p.id}')">Eliminar</button>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  list.innerHTML=html;
-}
-
-function deleteProduct(id){
-  if(confirm('¿Eliminar este registro de vencimiento?')){
-    products=products.filter(x=>x.id!==id);
-    saveProducts();
-    updateMetrics();
-    renderProducts();
-    toast('Registro eliminado');
-  }
-}
-
-// Gestión de Usuarios y Login
-function initSelects(){
-  const sel=$('loginUser');
-  sel.innerHTML=users.filter(u=>u.active).map(u=>`<option value="${u.id}">${esc(u.name)} (${roleLabel(u.role)})</option>`).join('');
-  
-  const secSel=$('sector');
-  secSel.innerHTML=SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-  
-  const sf=$('sectorFilter');
-  sf.innerHTML=`<option value="">Todos los sectores</option>`+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-}
-
-function login(){
-  const uid=$('loginUser').value;
-  const pin=$('loginPin').value;
-  const user=users.find(u=>u.id===uid);
-
-  if(!user || user.pin!==pin){
-    toast('PIN incorrecto');
-    return;
-  }
-
-  current=user;
-  localStorage.setItem(SK, JSON.stringify(current));
-  $('loginPin').value='';
-  bootApp();
-}
-
-function logout(){
-  current=null;
-  localStorage.removeItem(SK);
-  $('login').classList.remove('hidden');
-  $('app').classList.add('hidden');
-}
-
-function bootApp(){
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  $('topName').textContent=current.name;
-  $('topRole').textContent=roleLabel(current.role);
-  $('avatar').textContent=current.name.charAt(0);
-
-  if(current.role==='supervisor'){
-    $('adminButton').style.display='block';
-  }else{
-    $('adminButton').style.display='none';
-  }
-
-  updateMetrics();
-  renderProducts();
-  renderUsers();
-}
-
-function show(viewId){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  $(viewId).classList.add('active');
-  if(viewId==='critical'){
-    renderProducts();
-  }
-}
-
-function openAccount(){
-  $('profileAvatar').textContent=current.name.charAt(0);
-  $('profileName').textContent=current.name;
-  $('profileRole').textContent=roleLabel(current.role);
-  $('profileSectors').textContent=current.sectors && current.sectors.length ? 'Sectores: '+current.sectors.join(', ') : '';
-  show('account');
-}
-
-function changeOwnPin(){
-  const newPin=prompt('Ingresá tu nuevo PIN (4 números):');
-  if(newPin && /^\d{4}$/.test(newPin)){
-    current.pin=newPin;
-    const u=users.find(x=>x.id===current.id);
-    if(u) u.pin=newPin;
-    saveUsers();
-    toast('PIN actualizado con éxito');
-  }else if(newPin){
-    toast('El PIN debe tener exactamente 4 números');
-  }
-}
-
-// Administración de usuarios
-function renderUsers(){
-  const list=$('userList');
-  list.innerHTML=users.map(u=>`
-    <div class="userrow ${u.active?'':'inactive'}">
-      <div>
-        <strong>${esc(u.name)}</strong>
-        <div style="font-size:11px;color:var(--muted)">PIN: ****</div>
-      </div>
-      <div><span class="role ${u.role}">${roleLabel(u.role)}</span></div>
-      <div><span style="font-size:12px">${u.active?'Activo':'Desactivado'}</span></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn secondary small" onclick="openUser('${u.id}')">Editar</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openUser(id=''){
-  $('userEditId').value=id;
-  $('userForm').reset();
-  if(id){
-    $('userTitle').textContent='Editar usuario';
-    const u=users.find(x=>x.id===id);
-    if(u){
-      $('userName').value=u.name;
-      $('userRole').value=u.role;
-      $('userPin').value=u.pin;
-      $('userActive').value=String(u.active);
-    }
-  }else{
-    $('userTitle').textContent='Crear usuario';
-  }
-  show('userFormView');
-}
-
-document.getElementById('userForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const id=$('userEditId').value;
-  const name=$('userName').value.trim();
-  const role=$('userRole').value;
-  const pin=$('userPin').value.trim();
-  const active=$('userActive').value==='true';
-
-  if(!name || !pin){
-    toast('Completá los campos obligatorios');
-    return;
-  }
-
-  if(!/^\d{4}$/.test(pin)){
-    toast('El PIN debe tener 4 dígitos numéricos');
-    return;
-  }
-
-  if(id){
-    const u=users.find(x=>x.id===id);
-    if(u){
-      u.name=name; u.role=role; u.pin=pin; u.active=active;
-    }
-    toast('Usuario actualizado');
-  }else{
-    users.push({
-      id: uid(),
-      name, role, pin, active, sectors:[]
-    });
-    toast('Usuario creado');
-  }
-
-  saveUsers();
-  renderUsers();
-  show('users');
-});
-
-// Inicialización general al cargar la página
-window.addEventListener('DOMContentLoaded', ()=>{
-  initSelects();
-  const savedSession=localStorage.getItem(SK);
-  if(savedSession){
-    try{
-      current=JSON.parse(savedSession);
-      const found=users.find(u=>u.id===current.id);
-      if(found && found.active){
-        current=found;
-        bootApp();
-      }else{
-        logout();
-      }
-    }catch(e){
-      logout();
-    }
-  }
-});
-</script>
-</body>
-</html>
+// Navegación y Sesión
+function parseRoute(){
+  let p=new URLSearchParams(location.search),sector=(p.get('sector')||'').trim(),view=(p.get('vista')||'').toLowerCase();
+  let found=SECTORS.find(s=>s.toLowerCase()===
