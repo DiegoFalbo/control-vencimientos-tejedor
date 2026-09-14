@@ -1,653 +1,493 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#071a33">
-<title>Control de Vencimientos | MAR DEL PLATA TEJEDOR</title>
-
-<!-- Librerías Externas -->
-<script src="https://unpkg.com/html5-qrcode"></script>
-
-<style>
-:root{--navy:#071a33;--navy2:#0d315d;--blue:#146bcc;--bg:#f1f5f9;--card:#fff;--text:#172033;--muted:#667085;--line:#d8e0ea;--red:#c62828;--orange:#ee6c00;--green:#16824a;--purple:#673ab7;--shadow:0 10px 30px rgba(13,35,65,.1)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at top,#235d99 0,#0c2e55 38%,#06172c 100%)}.login-card{width:min(440px,100%);background:#fff;border-radius:27px;padding:27px;box-shadow:0 25px 70px #0005}.logo{width:62px;height:62px;border-radius:19px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);display:grid;place-items:center;color:#fff;font-weight:900;font-size:28px;margin-bottom:18px}.login h1{margin:0;font-size:27px}.station{color:var(--blue);font-weight:900;margin:6px 0}.sub{color:var(--muted);line-height:1.5;font-size:14px}.field{margin-top:15px}label{font-size:13px;font-weight:800;display:block;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--text);outline:none}input:focus,select:focus,textarea:focus{border-color:#4b91e5;box-shadow:0 0 0 3px #146bcc1f}.pin{font-size:23px;letter-spacing:8px;text-align:center}.login-btn,.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:850}.login-btn{width:100%;margin-top:18px;background:var(--blue);color:#fff}
-.top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:13px 18px;position:sticky;top:0;z-index:30;box-shadow:0 5px 18px #0003}.top-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand h1{margin:0;font-size:19px}.brand small{color:#bad0e8}.userbox{display:flex;align-items:center;gap:9px}.uinfo{text-align:right}.uinfo strong{display:block;font-size:13px}.uinfo span{font-size:11px;color:#bad0e8}.avatar{width:42px;height:42px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--navy);font-weight:900;font-size:16px;transition:.2s;box-shadow:0 4px 12px #0003}.avatar:hover,.avatar:focus{transform:scale(1.07);box-shadow:0 0 0 4px #ffffff40}.logout{background:#ffffff16;border:1px solid #ffffff35;color:#fff;border-radius:10px;padding:9px 11px}
-main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.view.active{display:block}.welcome{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}.welcome h2{margin:0;font-size:clamp(24px,5vw,36px)}.welcome p{margin:5px 0 0;color:var(--muted)}.sync{font-size:12px;color:var(--muted)}
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.action{border:0;border-radius:20px;min-height:145px;padding:21px;color:#fff;text-align:left;box-shadow:var(--shadow)}.action.blue{background:linear-gradient(135deg,#0d63c7,#1593e7)}.action.red{background:linear-gradient(135deg,#a91e22,#e44638)}.action.purple{background:linear-gradient(135deg,#4c2d97,#8256d5)}.action span{display:block;font-size:30px;margin-bottom:13px}.action strong{font-size:19px}.action small{display:block;opacity:.85;margin-top:7px;line-height:1.4}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.metric{background:#fff;border-radius:17px;padding:16px;border-left:5px solid #98a2b3;box-shadow:var(--shadow)}.metric.red{border-color:var(--red)}.metric.orange{border-color:var(--orange)}.metric.yellow{border-color:#e0a800}.metric.green{border-color:var(--green)}.metric b{font-size:28px;display:block}.metric small{color:var(--muted)}
-.card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.small{padding:7px 10px;font-size:11px}.sector-banner{background:#e9f4ff;border:1px solid #aed2f5;color:#124f84;border-radius:13px;padding:12px 14px;margin-bottom:14px;font-weight:800}
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:13px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:15px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px}.item h3{margin:0 0 7px;font-size:17px}.meta{display:flex;flex-wrap:wrap;gap:6px 13px;color:var(--muted);font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.vencido{background:#fde0e0;color:#a51b1b}.badge.critico{background:#ffe5d2;color:#ae4900}.badge.proximo{background:#fff1c0;color:#775600}.badge-sku{background:#e2e8f0;color:#334155;padding:2px 7px;border-radius:6px;font-weight:800;font-size:11px}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.empty{text-align:center;color:var(--muted);padding:35px}.notice{background:#eef6ff;border:1px solid #bfd8f5;color:#164f82;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}.warning{background:#fff5ce;border:1px solid #f0d46d;color:#6e5600;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}
-.userrow{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:9px}.role{font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px;display:inline-flex}.role.supervisor{background:#e9ddff;color:#563090}.role.responsable{background:#dceeff;color:#174c83}.role.encargado{background:#e5f5eb;color:#18633b}.inactive{opacity:.55}.checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.check{display:flex;gap:7px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px}.check input{width:auto}.profile{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}.profile-avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:28px;font-weight:900}.profile h3{margin:0 0 5px}.profile p{margin:3px 0;color:var(--muted)}.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,110px);background:#102943;color:#fff;border-radius:12px;padding:12px 17px;opacity:0;transition:.3s;z-index:100}.toast.show{opacity:1;transform:translate(-50%,0)}
-
-.input-group{display:flex;gap:8px}
-.input-group input{flex:1}
-#camera-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(7,26,51,0.85);z-index:1000;align-items:center;justify-content:center;padding:15px}
-#camera-modal-content{background:#fff;padding:20px;border-radius:20px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3)}
-#reader{width:100%;margin:12px 0;border-radius:12px;overflow:hidden;background:#000}
-.field-hint{font-size:12px;color:var(--orange);margin-top:5px;font-weight:700}
-
-@media(max-width:760px){.actions{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.grid,.filters,.userrow{grid-template-columns:1fr}.full{grid-column:auto}.welcome{align-items:start;flex-direction:column}.uinfo{display:none}.checkgrid{grid-template-columns:1fr 1fr}.item{grid-template-columns:1fr}.form-actions .btn{flex:1}.action{min-height:125px}.top{position:relative}.profile{grid-template-columns:1fr;text-align:center}.profile-avatar{margin:auto}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Vencimientos - YPF Full</title>
+    <!-- Estilos y librerías opcionales según tu proyecto -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e30613; /* Rojo YPF */
+        }
+    </style>
 </head>
 <body>
 
-<section id="login" class="login">
-  <div class="login-card">
-    <div class="logo">V</div>
-    <h1>Control de Vencimientos</h1>
-    <div class="station">MAR DEL PLATA TEJEDOR</div>
-    <p class="sub" id="loginMessage">Seleccioná tu usuario e ingresá el PIN.</p>
-    <div class="field"><label>Usuario</label><select id="loginUser"></select></div>
-    <div class="field"><label>PIN</label><input id="loginPin" class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
-    <button class="login-btn" onclick="login()">Ingresar</button>
-  </div>
-</section>
-
-<div id="app" class="hidden">
-  <header class="top">
-    <div class="top-inner">
-      <div class="brand">
-        <h1>Control de Vencimientos</h1>
-        <small>MAR DEL PLATA TEJEDOR · v2.5 Auto-Catálogo</small>
-      </div>
-      <div class="userbox">
-        <div class="uinfo"><strong id="topName"></strong><span id="topRole"></span></div>
-        <button class="avatar" id="avatar" onclick="openAccount()" title="Mi cuenta" aria-label="Abrir Mi cuenta"></button>
-        <button class="logout" onclick="logout()">Salir</button>
-      </div>
+    <div class="container">
+        <h1>Control de Vencimientos - Tejedor</h1>
+        <p>Sistema operativo de gestión y control de stock.</p>
+        <div id="app">
+            <!-- Tu interfaz y tablas dinámicas se cargan aquí -->
+        </div>
     </div>
-  </header>
 
-  <main>
-    <!-- Inicio / Panel Principal -->
-    <section id="home" class="view active">
-      <div class="welcome">
-        <div><h2 id="greeting">Panel principal</h2><p>Registrá vencimientos y controlá los productos que requieren atención.</p></div>
-        <span class="sync">Guardado local</span>
-      </div>
-      <div class="actions">
-        <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
-        <button class="action red" onclick="show('critical')"><span>!</span><strong>Ver críticos</strong><small>Vencidos y productos que vencen dentro de 15 días.</small></button>
-        <button id="adminButton" class="action purple" onclick="show('users')"><span>⚙</span><strong>Administrar usuarios</strong><small>Crear, modificar, asignar roles y restablecer PIN.</small></button>
-      </div>
-      <div class="metrics">
-        <div class="metric red"><b id="mv">0</b><small>Vencidos</small></div>
-        <div class="metric orange"><b id="mc">0</b><small>Críticos: 0 a 15 días</small></div>
-        <div class="metric yellow"><b id="mp">0</b><small>Próximos: 16 a 30 días</small></div>
-        <div class="metric green"><b id="mt">0</b><small>Registros activos</small></div>
-      </div>
-    </section>
+    <script>
+        // Claves de almacenamiento
+        const MK = 'ypf_maestro_productos';
+        const MK_VERSION_KEY = 'ypf_maestro_version';
+        const CURRENT_VERSION = '2.0'; // Incrementá esto si modificás la lista en el futuro para actualizar automáticamente
 
-    <!-- Mi Cuenta -->
-    <section id="account" class="view">
-      <div class="head"><h2>Mi cuenta</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="card">
-        <div class="profile">
-          <div class="profile-avatar" id="profileAvatar"></div>
-          <div><h3 id="profileName"></h3><p id="profileRole"></p><p id="profileSectors"></p></div>
-        </div>
-        <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
-        <p class="sub">Podés modificar tu PIN cuando quieras. El PIN debe tener cuatro números.</p>
-        <button class="btn secondary" onclick="changeOwnPin()">Cambiar mi PIN</button>
-      </div>
-    </section>
-
-    <!-- Cargar Vencimiento -->
-    <section id="product" class="view">
-      <div class="head"><h2 id="productTitle">Cargar vencimiento</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div id="sectorBanner" class="sector-banner hidden"></div>
-
-      <div class="card">
-        <form id="productForm">
-          <input type="hidden" id="editId">
-          <div class="grid">
-            <div class="full">
-              <label>Código SKU / EAN (Escáner)</label>
-              <div class="input-group">
-                <input id="sku" placeholder="Ingresá o escaneá el código" oninput="onSkuInput()" autocomplete="off">
-                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Cámara</button>
-              </div>
-              <div id="maestroNotice" class="field-hint hidden">
-                ⚠️ Producto nuevo. Al guardar el vencimiento se registrará automáticamente en la base maestra.
-              </div>
-            </div>
-            <div class="full"><label>Descripción *</label><input id="description" required placeholder="Nombre del producto"></div>
-            <div><label>Cantidad *</label><input id="quantity" type="number" min="1" value="1" required></div>
-            <div><label>Vencimiento *</label><input id="expiry" type="date" required></div>
-            <div><label>Lote</label><input id="batch"></div>
-            <div><label>Sector *</label><select id="sector" required></select></div>
-            <div class="full"><label>Observaciones</label><textarea id="notes" rows="3"></textarea></div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" onclick="show('home')">Cancelar</button>
-            <button class="btn primary">Guardar Vencimiento</button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Productos Críticos -->
-    <section id="critical" class="view">
-      <div class="head"><h2>Productos críticos</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="warning">Crítico: entre hoy y 15 días. Próximo: entre 16 y 30 días.</div>
-      <div class="card">
-        <div class="filters">
-          <input id="search" placeholder="Buscar por descripción o SKU..." oninput="renderProducts()">
-          <select id="stateFilter" onchange="renderProducts()">
-            <option value="">Todos los estados</option>
-            <option value="vencido">Vencidos</option>
-            <option value="critico">Críticos</option>
-            <option value="proximo">Próximos</option>
-          </select>
-          <select id="sectorFilter" onchange="renderProducts()"></select>
-        </div>
-        <div id="productList" class="list"></div>
-      </div>
-    </section>
-
-    <!-- Administrar Usuarios -->
-    <section id="users" class="view">
-      <div class="head"><h2>Administrar usuarios</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="notice">Disponible únicamente para supervisores. Los usuarios desactivados conservan su historial.</div>
-      <div class="card">
-        <button class="btn primary" onclick="openUser()">＋ Crear usuario</button>
-        <div id="userList" style="margin-top:15px"></div>
-      </div>
-    </section>
-
-    <!-- Formulario Crear/Editar Usuario -->
-    <section id="userFormView" class="view">
-      <div class="head"><h2 id="userTitle">Crear usuario</h2><button class="back" onclick="show('users')">← Volver</button></div>
-      <div class="card">
-        <form id="userForm">
-          <input type="hidden" id="userEditId">
-          <div class="grid">
-            <div><label>Nombre *</label><input id="userName" required></div>
-            <div><label>Rol *</label>
-              <select id="userRole" onchange="toggleSectorAssignment()">
-                <option value="encargado">Encargado</option>
-                <option value="responsable">Responsable de sector</option>
-                <option value="supervisor">Supervisor</option>
-              </select>
-            </div>
-            <div><label>PIN inicial / nuevo PIN *</label><input id="userPin" type="password" inputmode="numeric" maxlength="4" required></div>
-            <div><label>Estado</label>
-              <select id="userActive">
-                <option value="true">Activo</option>
-                <option value="false">Desactivado</option>
-              </select>
-            </div>
-            <div id="sectorAssignment" class="full hidden"><label>Sectores asignados</label><div id="sectorChecks" class="checkgrid"></div></div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" onclick="show('users')">Cancelar</button>
-            <button class="btn primary">Guardar usuario</button>
-          </div>
-        </form>
-      </div>
-    </section>
-  </main>
-</div>
-
-<!-- Modal Visor de Cámara -->
-<div id="camera-modal">
-  <div id="camera-modal-content">
-    <h3 style="margin-bottom:8px;">Escanear Código de Barras</h3>
-    <div id="reader"></div>
-    <button class="btn danger" style="margin-top:10px;width:100%;" onclick="stopCameraScanner()">Cerrar Cámara</button>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script>
-const SECTORS=['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
-const UK='cv_users_v22',PK='cv_products_v22',SK='cv_session_v22',MK='cv_maestro_v22';
-
-let current=null,lockedSector='',pendingRoute={view:'home',sector:''};
-let html5QrCode=null;
-
-function defaults(){
-  return[
-    {id:'diego',name:'DIEGO',pin:'2039',role:'supervisor',active:true,sectors:[]},
-    {id:'yesica',name:'YESICA',pin:'2039',role:'supervisor',active:true,sectors:[]},
-    {id:'lucas',name:'LUCAS',pin:'2039',role:'supervisor',active:true,sectors:[]},
-    {id:'marcos',name:'MARCOS',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'daiana',name:'DAIANA',pin:'2039',role:'encargado',active:true,sectors:[]},
-    {id:'agustin',name:'AGUSTIN',pin:'2039',role:'encargado',active:true,sectors:[]}
-  ];
-}
-
-let users=JSON.parse(localStorage.getItem(UK)||'null')||defaults();
-let products=JSON.parse(localStorage.getItem(PK)||'[]');
-let BASE_MAESTRO=JSON.parse(localStorage.getItem(MK)||'[]');
-
-const $=x=>document.getElementById(x);
-const saveUsers=()=>localStorage.setItem(UK,JSON.stringify(users));
-const saveProducts=()=>localStorage.setItem(PK,JSON.stringify(products));
-const saveMaestro=()=>localStorage.setItem(MK,JSON.stringify(BASE_MAESTRO));
-
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)}
-function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
-function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
-
-// Búsqueda y Verificación en Base Maestra (Escáner Físico / Cámara / Teclado)
-function onSkuInput(){
-  const val=$('sku').value.trim();
-  const notice=$('maestroNotice');
-
-  if(!val){
-    notice.classList.add('hidden');
-    return false;
-  }
-
-  const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
-  if(match){
-    $('description').value=match.description;
-    notice.classList.add('hidden');
-    return true;
-  }else{
-    notice.classList.remove('hidden');
-    return false;
-  }
-}
-
-// Captura de eventos del escáner de pistola USB/Bluetooth (evita que el 'Enter' del lector envíe el formulario)
-window.addEventListener('DOMContentLoaded', ()=>{
-  const skuInput = $('sku');
-  if(skuInput){
-    skuInput.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        const existe = onSkuInput();
-        if(existe){
-          $('quantity').focus();
-        }else{
-          $('description').focus();
+        function defaultMaestro(){
+          return [
+            {sku: '7798343751019', description: 'Barra Integra Caju y Arandanos 41 Gr', sector: 'GONDOLAS'},
+            {sku: '7792981071270', description: 'Barra Proteica ENA Banana 46 Gr', sector: 'GONDOLAS'},
+            {sku: '7792981071263', description: 'Barra Proteica ENA Frutilla 46 Gr', sector: 'GONDOLAS'},
+            {sku: '77916389', description: 'Chicle Top Line Fruta 6,7 Gr', sector: 'CARAMELERA'},
+            {sku: '77916426', description: 'Chicle Top Line Menta 6,7 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580110130', description: 'Oblea Bon o Bon XL 45 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070431653', description: 'Oblea Gallo Choco White 20 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070418203', description: 'Alfajor Chocoarroz Dulce de Leche 22 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070104410', description: 'Alfajor Chocoarroz Pistacho 28 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070103192', description: 'Alfajor Chocoarroz Super Dulce de Leche 28 Gr', sector: 'GONDOLAS'},
+            {sku: '77916501', description: 'Barra Cereal Mix Clasico 23 Gr', sector: 'GONDOLAS'},
+            {sku: '77965394', description: 'Barra Cereal Mix Frutilla Yogurt 26 Gr', sector: 'GONDOLAS'},
+            {sku: '77965370', description: 'Barra Cereal Mix Frutilla Yogurt Light 26 Gr', sector: 'GONDOLAS'},
+            {sku: '7798401690199', description: 'Barra Full Arandanos y Almendras 40 Gr', sector: 'GONDOLAS'},
+            {sku: '7798401690182', description: 'Barra Full Cacao y Mani 40 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070431905', description: 'Barra Gallo Chocobar 20 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070432223', description: 'Barra Gallo Yogubar 20 Gr', sector: 'GONDOLAS'},
+            {sku: '7798333090067', description: 'Barra Muecas Cacao y Avellanas 45 Gr', sector: 'GONDOLAS'},
+            {sku: '7798333090142', description: 'Barra Muecas Pasas sin Azucar 45 Gr', sector: 'GONDOLAS'},
+            {sku: '7798343751422', description: 'Barra Proteica Integra Mani y Chocolate 45 Gr', sector: 'GONDOLAS'},
+            {sku: '7792360096634', description: 'Bizcochuelo Chocman Semiamargo 35 Gr', sector: 'GONDOLAS'},
+            {sku: '77969118', description: 'Chicle Beldent Fomo Frutilla 10 Gr', sector: 'CARAMELERA'},
+            {sku: '77969101', description: 'Chicle Beldent Fomo Globo 10 Gr', sector: 'CARAMELERA'},
+            {sku: '77969071', description: 'Chicle Beldent Fomo Menta 10 Gr', sector: 'CARAMELERA'},
+            {sku: '77969088', description: 'Chicle Beldent Fomo Menta Fuerte 10 Gr', sector: 'CARAMELERA'},
+            {sku: '77969095', description: 'Chicle Beldent Fomo Mentol 10 Gr', sector: 'CARAMELERA'},
+            {sku: '7622201457457', description: 'Chicle Beldent Infinit Blueberry 26,6 Gr', sector: 'CARAMELERA'},
+            {sku: '7622201421496', description: 'Chicle Beldent Infinit Menta 13,3 Gr', sector: 'CARAMELERA'},
+            {sku: '7622201457334', description: 'Chicle Beldent Infinit Menta 26,6 Gr', sector: 'CARAMELERA'},
+            {sku: '7622201448226', description: 'Chicle Beldent Infinit Spearmint 13,3 Gr', sector: 'CARAMELERA'},
+            {sku: '7622201457396', description: 'Chicle Beldent Infinit Spearmint 26,6 Gr', sector: 'CARAMELERA'},
+            {sku: '77932693', description: 'Chicle Top Line 7 Mandarina 14 Gr', sector: 'CARAMELERA'},
+            {sku: '77931764', description: 'Chicle Top Line 7 Menta 14 Gr', sector: 'CARAMELERA'},
+            {sku: '77951113', description: 'Chicle Top Line 7 Strawberry 14 Gr', sector: 'CARAMELERA'},
+            {sku: '77939753', description: 'Chicle Top Line 7 Strong 14 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580120573', description: 'Chicle Top Line 7 Ultra Clean Mint 24 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580120702', description: 'Chicle Top Line 7 Ultra Green Mint 24 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580121013', description: 'Chicle Top Line 7 Ultra Red Berry 24 Gr', sector: 'CARAMELERA'},
+            {sku: '77988270', description: 'Chicle Top Line Menta 6,7 Gr', sector: 'CARAMELERA'},
+            {sku: '22000293213', description: 'Chicle Wrigleys Doublemint 12,5 Gr', sector: 'CARAMELERA'},
+            {sku: '22000293305', description: 'Chicle Wrigleys Spearmint 12,5 Gr', sector: 'CARAMELERA'},
+            {sku: '7798182731326', description: 'Galletita Full Cookie Vainilla Chips 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968914527', description: 'Galletita Full Limon 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7798182731289', description: 'Galletita Full Limon c/Chocolate 50 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968915364', description: 'Galletita Full Naranja c/Chocolate 50 Gr', sector: 'GONDOLAS'},
+            {sku: '77976291', description: 'Galletita Tita Bañada 19 Gr', sector: 'GONDOLAS'},
+            {sku: '7792981070204', description: 'Gel ENA Frutilla 32 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580124441', description: 'Gomitas Mogul 360 Cubo 26 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580124519', description: 'Gomitas Mogul 360 Mango 26 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580124373', description: 'Gomitas Mogul 360 Osito 26 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580124465', description: 'Gomitas Mogul 360 Uva 26 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580346614', description: 'Oblea Bon o Bon Blanco 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580346515', description: 'Oblea Bon o Bon Negro 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790070411952', description: 'Oblea Gallo Original 20 Gr', sector: 'GONDOLAS'},
+            {sku: '7792360072461', description: 'Oblea Nugaton Blanco 27 Gr', sector: 'GONDOLAS'},
+            {sku: '7792360072447', description: 'Oblea Nugaton Leche 27 Gr', sector: 'GONDOLAS'},
+            {sku: '7792360072485', description: 'Oblea Nugaton Negro 27 Gr', sector: 'GONDOLAS'},
+            {sku: '77995681', description: 'Oblea Rhodesia 22 Gr', sector: 'GONDOLAS'},
+            {sku: '77940131', description: 'Turron Arcor 27 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580116880', description: 'Caramelos Mogul Masti Splash 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580104382', description: 'Confites Mogul Masti 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580139421', description: 'Pastillas Mogul Jelly Beans Mundial 50 Gr', sector: 'CARAMELERA'},
+            {sku: '111', description: 'Caramelos Arcor Cristal 1 Un', sector: 'CARAMELERA'},
+            {sku: '7792222003312', description: 'Caramelos Billiken Gotitas de Amor 35 Gr', sector: 'CARAMELERA'},
+            {sku: '77907943', description: 'Caramelos Lenguetazo 13 Gr', sector: 'CARAMELERA'},
+            {sku: '78916401', description: 'Caramelos Mentos Fruit 29,7 Gr', sector: 'CARAMELERA'},
+            {sku: '78925281', description: 'Caramelos Mentos Frutilla 29,7 Gr', sector: 'CARAMELERA'},
+            {sku: '78916418', description: 'Caramelos Mentos Menta 29,7 Gr', sector: 'CARAMELERA'},
+            {sku: '78930643', description: 'Caramelos Mentos Tutti Frutti 29,7 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580116873', description: 'Caramelos Mogul Masti Extreme Splash 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580117993', description: 'Caramelos Mogul Masti Palotes 48 Gr', sector: 'CARAMELERA'},
+            {sku: '112', description: 'Caramelos Sugus 1 Un', sector: 'CARAMELERA'},
+            {sku: '12243', description: 'Chupetin Mr Pop Frutal 12,5 Gr', sector: 'CARAMELERA'},
+            {sku: '7798040463598', description: 'Chupetin Push Pop 15 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580104429', description: 'Confites Mogul Masti Extreme 30 Gr', sector: 'CARAMELERA'},
+            {sku: '22000018465', description: 'Confites Skittles Original 61 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580056001', description: 'Confites Sugus 50 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580131272', description: 'Gomitas Mogul Moras 50 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580199913', description: 'Gomitas Mogul Ositos 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580129330', description: 'Gomitas Mogul Oso Acidas 50 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580116965', description: 'Gomitas Mogul Rollo Acidas 35 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580602000', description: 'Gomitas Mogul Rollo Surtidas 35 Gr', sector: 'CARAMELERA'},
+            {sku: '7790580200114', description: 'Gomitas Mogul Tiburoncitos 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7798186033457', description: 'Gomitas Yummy Moritas 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7798186032627', description: 'Gomitas Yummy Ositos 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7798186033051', description: 'Gomitas Yummy Piecitos 30 Gr', sector: 'CARAMELERA'},
+            {sku: '7622202247286', description: 'Pastillas Halls Cherry 25,2 Gr', sector: 'CARAMELERA'},
+            {sku: '7622202247316', description: 'Pastillas Halls Menta 25,2 Gr', sector: 'CARAMELERA'},
+            {sku: '7622202247392', description: 'Pastillas Halls Menthol 25,2 Gr', sector: 'CARAMELERA'},
+            {sku: '7622202271267', description: 'Pastillas Halls Strong 25,2 Gr', sector: 'CARAMELERA'},
+            {sku: '77904744', description: 'Pastillas La Yapa 17 Gr', sector: 'CARAMELERA'},
+            {sku: '77944405', description: 'Pastillas Mentho Plus Acidos Cereza 27,2 Gr', sector: 'CARAMELERA'},
+            {sku: '77944412', description: 'Pastillas Mentho Plus Acidos Naranja 27,2 Gr', sector: 'CARAMELERA'},
+            {sku: '77958631', description: 'Pastillas Mentho Plus Cereza 29,4 Gr', sector: 'CARAMELERA'},
+            {sku: '77958662', description: 'Pastillas Mentho Plus Menta 29,4 Gr', sector: 'CARAMELERA'},
+            {sku: '77958624', description: 'Pastillas Mentho Plus Menthol 29,4 Gr', sector: 'CARAMELERA'},
+            {sku: '77958655', description: 'Pastillas Mentho Plus Miel 29,4 Gr', sector: 'CARAMELERA'},
+            {sku: '77958648', description: 'Pastillas Mentho Plus Strong 29,4 Gr', sector: 'CARAMELERA'},
+            {sku: '77946805', description: 'Pastillas Mentho Plus Zero Cherry 27,3 Gr', sector: 'CARAMELERA'},
+            {sku: '77946829', description: 'Pastillas Mentho Plus Zero Mentol 27,3 Gr', sector: 'CARAMELERA'},
+            {sku: '78600010', description: 'Pastillas Tic Tac Menta 16 Gr', sector: 'CARAMELERA'},
+            {sku: '7797394001265', description: 'Pastillas Tic Tac Mix Frutal 16 Gr', sector: 'CARAMELERA'},
+            {sku: '78600027', description: 'Pastillas Tic Tac Naranja 16 Gr', sector: 'CARAMELERA'},
+            {sku: '7790040133594', description: 'Alfajor Aguila Brownie 71,5 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040133587', description: 'Alfajor Aguila Minitorta 69 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040375000', description: 'Alfajor B&N Chocolate 73,5 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040613607', description: 'Alfajor Bon o Bon Blanco 40 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040613706', description: 'Alfajor Bon o Bon Negro 40 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040148840', description: 'Alfajor Bon o Bon Triple Negro 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040659605', description: 'Alfajor Cofler Block Chocolate 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968001548', description: 'Alfajor Full Blanco 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968913049', description: 'Alfajor Full Mousse 50 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968915425', description: 'Alfajor Full Mundialista Negro 75 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968001531', description: 'Alfajor Full Negro 60 Gr', sector: 'GONDOLAS'},
+            {sku: '77903785', description: 'Alfajor Milka Triple Mousse 55 Gr', sector: 'GONDOLAS'},
+            {sku: '7622300457303', description: 'Alfajor Milka Triple Mousse Blanco 55 Gr', sector: 'GONDOLAS'},
+            {sku: '7798397444202', description: 'Alfajor Rasta Negro 70 Gr', sector: 'GONDOLAS'},
+            {sku: '77956699', description: 'Alfajor Shot Triple 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790380023579', description: 'Alfajor Toddy Mousse 50 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580103439', description: 'Chocolate Cofler Air Almendras 55 Gr', sector: 'GONDOLAS'},
+            {sku: '7791249451656', description: 'Chocolate Shot c/Mani 90 Gr', sector: 'GONDOLAS'},
+            {sku: '7792730020559', description: 'Chocolate Biznikke Nevado 120 Gr', sector: 'GONDOLAS'},
+            {sku: '7622201818739', description: 'Chocolate Cadbury Tres Sueños 82 Gr', sector: 'GONDOLAS'},
+            {sku: '7622201818715', description: 'Chocolate Cadbury Yogurt Frutilla 82 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580103415', description: 'Chocolate Cofler Air Blanco 55 Gr', sector: 'GONDOLAS'},
+            {sku: '77922120', description: 'Chocolate Cofler Block c/Mani 110 Gr', sector: 'GONDOLAS'},
+            {sku: '7622202333255', description: 'Chocolate Shot c/Mani 90 Gr', sector: 'GONDOLAS'},
+            {sku: '7790380025139', description: 'Chocolate Toddy Blanco c/Cookies 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790380025122', description: 'Chocolate Toddy Leche 60 Gr', sector: 'GONDOLAS'},
+            {sku: '80052760', description: 'Oblea Kinder Bueno Leche 43 Gr', sector: 'GONDOLAS'},
+            {sku: '77955821', description: 'Chocolate Aguila 60% Cacao 14 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580123741', description: 'Chocolate Graffiti Blanco 45 Gr', sector: 'GONDOLAS'},
+            {sku: '77988263', description: 'Bocadito Bananita Dolca 30 Gr', sector: 'GONDOLAS'},
+            {sku: '10', description: 'Bocadito Cabsha 10 Gr', sector: 'GONDOLAS'},
+            {sku: '77985996', description: 'Bocadito Cachafaz Marroc 14 Gr', sector: 'GONDOLAS'},
+            {sku: '7622201816414', description: 'Bocadito Mantecol 41 Gr', sector: 'GONDOLAS'},
+            {sku: '77966056', description: 'Bomb Bon O Bon Dubai 15 Gr', sector: 'GONDOLAS'},
+            {sku: '77971944', description: 'Bombon Cofler Block 16 Gr', sector: 'GONDOLAS'},
+            {sku: '77931528', description: 'Chocolate Aguila Chocolate 14 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580607210', description: 'Chocolate Arcor Negro 25 Gr', sector: 'GONDOLAS'},
+            {sku: '7792730020610', description: 'Chocolate Biznikke Blanco 28 Gr', sector: 'GONDOLAS'},
+            {sku: '77991430', description: 'Chocolate Biznikke Nevado 28 Gr', sector: 'GONDOLAS'},
+            {sku: '7622201818579', description: 'Chocolate Cadbury Tres Sueños 25 Gr', sector: 'GONDOLAS'},
+            {sku: '7622201818654', description: 'Chocolate Cadbury Yogurt Frutilla 25 Gr', sector: 'GONDOLAS'},
+            {sku: '77981912', description: 'Chocolate Cofler Block Blanco c/Mani 38 Gr', sector: 'GONDOLAS'},
+            {sku: '77953124', description: 'Chocolate Cofler Block c/Mani 38 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580126735', description: 'Chocolate Cofler Extra Chocotorta 46 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580124274', description: 'Chocolate Cofler Extra Cookies and Cream 46 Gr', sector: 'GONDOLAS'},
+            {sku: '80050315', description: 'Chocolate Kinder 12,5 Gr', sector: 'GONDOLAS'},
+            {sku: '77949677', description: 'Chocolate Kinder 50 Gr', sector: 'GONDOLAS'},
+            {sku: '80050094', description: 'Chocolate Kinder Maxi 21 Gr', sector: 'GONDOLAS'},
+            {sku: '40000001447', description: 'Chocolate M&M Mantequilla de Mani 40 Gr', sector: 'GONDOLAS'},
+            {sku: '77914217', description: 'Chocolate Shot c/Mani 35 Gr', sector: 'GONDOLAS'},
+            {sku: '4010508', description: 'Chocolate Snickers Almendras 48 Gr', sector: 'GONDOLAS'},
+            {sku: '7506174512248', description: 'Chocolate Snickers Original 48 Gr', sector: 'GONDOLAS'},
+            {sku: '77974648', description: 'Chocolate Tofi Blanco 27 Gr', sector: 'GONDOLAS'},
+            {sku: '77974631', description: 'Chocolate Tofi Leche 28 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580110284', description: 'Confites Cofler Block Mani 40 Gr', sector: 'GONDOLAS'},
+            {sku: '7797453001441', description: 'Confites M&M Chocolate 48 Gr', sector: 'GONDOLAS'},
+            {sku: '7790580327415', description: 'Confites Rocklets Chocolate 40 Gr', sector: 'GONDOLAS'},
+            {sku: '40084107', description: 'Huevo Chocolate Kinder Nene 20 Gr', sector: 'GONDOLAS'},
+            {sku: '7891000422052', description: 'Oblea Kit Kat Triple 41,5 Gr', sector: 'GONDOLAS'},
+            {sku: '7891000379073', description: 'Oblea KitKat Dark 41,5 Gr', sector: 'GONDOLAS'},
+            {sku: '7891000248799', description: 'Oblea KitKat Milk 41,5 Gr', sector: 'GONDOLAS'},
+            {sku: '7891000379028', description: 'Oblea KitKat White 41,5 Gr', sector: 'GONDOLAS'},
+            {sku: '7798147780062', description: 'Bombones Franui Black 150 Gr', sector: 'HELADOS'},
+            {sku: '7798147784442', description: 'Bombones Franui Free 150 Gr', sector: 'HELADOS'},
+            {sku: '7798147783223', description: 'Bombones Franui Leche 150 Gr', sector: 'HELADOS'},
+            {sku: '7798147784008', description: 'Bombones Franui Pink 150 Gr', sector: 'HELADOS'},
+            {sku: '7790580118969', description: 'Helado Aguila Barrita 34 Gr', sector: 'HELADOS'},
+            {sku: '1014887', description: 'Helado Arcor Frambuesas Ch. Amargo 150 Gr', sector: 'HELADOS'},
+            {sku: '1014782', description: 'Helado Arcor Frambuesas Ch. Leche 150 Gr', sector: 'HELADOS'},
+            {sku: '7790580397203', description: 'Helado Bon o Bon Bon o Bon 104 Gr', sector: 'HELADOS'},
+            {sku: '7790580140816', description: 'Helado Bon o Bon Corazon 61 Gr', sector: 'HELADOS'},
+            {sku: '7790580108397', description: 'Helado Cofler Block 63 Gr', sector: 'HELADOS'},
+            {sku: '7790580982508', description: 'Helado Cofler Cono 110 Gr', sector: 'HELADOS'},
+            {sku: '7798070860237', description: 'Helado Freddo Americana 50 Gr', sector: 'HELADOS'},
+            {sku: '7798070861388', description: 'Helado Freddo Cookies & Cream 320 Gr', sector: 'HELADOS'},
+            {sku: '7798070861401', description: 'Helado Freddo Dulce de Leche 320 Gr', sector: 'HELADOS'},
+            {sku: '7798070861425', description: 'Helado Freddo Dulce de Leche 50 Gr', sector: 'HELADOS'},
+            {sku: '7798070861135', description: 'Helado Freddo Pistacho 50 Gr', sector: 'HELADOS'},
+            {sku: '7613035242524', description: 'Helado Frigor EPA Dulce de Leche Max 88 Gr', sector: 'HELADOS'},
+            {sku: '7899975803166', description: 'Helado Frigor Mega Pistacho 74 Gr', sector: 'HELADOS'},
+            {sku: '7798304841674', description: 'Helado Frigor Milka Stick 65 Gr', sector: 'HELADOS'},
+            {sku: '7899975800509', description: 'Helado Frigor Oreo Sandwich 81 Gr', sector: 'HELADOS'},
+            {sku: '7798304841421', description: 'Helado Frigor Torpedo Frutilla 63 Gr', sector: 'HELADOS'},
+            {sku: '7798354860922', description: 'Helado Full-Guapaletas CHOC AMARGO C/DDL 110 Gr', sector: 'HELADOS'},
+            {sku: '7798354860946', description: 'Helado Full-Guapaletas DULCE DE LECHE C/DDL 110 Gr', sector: 'HELADOS'},
+            {sku: '7798354860939', description: 'Helado Full-Guapaletas MARACUYADA L/C 110 Gr', sector: 'HELADOS'},
+            {sku: '7790580135263', description: 'Helado Kopa Frutill/Americana 90 Gr', sector: 'HELADOS'},
+            {sku: '763571659991', description: 'Helado Le Banana Bites Bana Choc Leche 150 Gr', sector: 'HELADOS'},
+            {sku: '7790580024901', description: 'Helado Slice Frutilla 70 Gr', sector: 'HELADOS'},
+            {sku: '7790580708405', description: 'Helado Slice Limon 67 Gr', sector: 'HELADOS'},
+            {sku: '7793913014150', description: 'Yogurt Tregar Entero Frutilla 120 Gr', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '20555', description: 'Promo Vizzio Mani Crocante/ Cereal 100', sector: 'GONDOLAS'},
+            {sku: '7790580131388', description: 'Bombones Arcor Seleccion 247 Gr', sector: 'GONDOLAS'},
+            {sku: '7792180139726', description: 'Bizcocho 9 de Oro Agridulce 215 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792180139719', description: 'Bizcocho 9 de Oro Grasa 215 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7795735000342', description: 'Bizcocho Don Satur Negritos 200 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7795735000328', description: 'Bizcocho Don Satur Salado 200 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040144071', description: 'Gall Traviata 108 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792180009487', description: 'Galletita 9 de Oro Pepas 200 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040143227', description: 'Galletita Chocolinas 170 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792180146090', description: 'Galletita Crujitas Clasicas 120 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792360096825', description: 'Galletita Donuts Blanco 78 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792360096818', description: 'Galletita Donuts Lecha 78 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040173200', description: 'Galletita Kesitas 125 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040145337', description: 'Galletita Macucas 110 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040137837', description: 'Galletita Mana Vainilla 136 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040143005', description: 'Galletita Media Tarde 321 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '77903518', description: 'Galletita Opera 92 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7622201735296', description: 'Galletita Oreo Clasica 118 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792180139375', description: 'Galletita Paseo 5 Semillas 250 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7792180139351', description: 'Galletita Paseo Salvado 250 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040139183', description: 'Galletita Polvorita 81 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040133242', description: 'Galletita rellena Mana Chocolate 152 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040719804', description: 'Galletita Rex 125 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040003569', description: 'Galletita Rex 75 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790580716707', description: 'Galletita Saladix Jamon 100 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790580697303', description: 'Galletita Saladix Pizza 100 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790380023432', description: 'Galletita Toddy 126 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7622202839962', description: 'Galletita Variedad Mix 390 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040153486', description: 'Galletitas Formis Cho Ddl 54 Gr', sector: 'DEPOSITO GALLETITAS'},
+            {sku: '7790040152014', description: 'Snack Saladix Jamon 40 Gr', sector: 'GONDOLAS'},
+            {sku: '7790040152021', description: 'Snack Saladix Pizza 40 Gr', sector: 'GONDOLAS'},
+            {sku: '12050', description: 'Ajuste venta DELIVERY producto sustituto', sector: 'INSUMOS'},
+            {sku: '7891109146385', description: 'Ojotas Havaianas 29 40', sector: 'GONDOLAS'},
+            {sku: '7891109146378', description: 'Ojotas Havaianas 37 38', sector: 'GONDOLAS'},
+            {sku: '7891109146392', description: 'Ojotas Havaianas 41 42', sector: 'GONDOLAS'},
+            {sku: '7891109146408', description: 'Ojotas Havaianas 43 44', sector: 'GONDOLAS'},
+            {sku: '7891109890455', description: 'Ojotas Havaianas 45 46', sector: 'GONDOLAS'},
+            {sku: '25304', description: 'Vaso Full reutilizable nuevo diseño', sector: 'INSUMOS'},
+            {sku: '23121', description: 'Combo Croque Monsieur + Vaso de Gaseosa', sector: 'FULL'},
+            {sku: '23196', description: 'Combo Pebete Top Crudo y Queso + Vaso de', sector: 'FULL'},
+            {sku: '23258', description: 'Combo Sand Triple Negro JyQ + Agua', sector: 'FULL'},
+            {sku: '7798024760255', description: 'Figazza Salame y Queso x 2Un', sector: 'FULL'},
+            {sku: '7798024760002', description: 'Pebete Jamon y Queso', sector: 'FULL'},
+            {sku: '7798024760378', description: 'Pebete Top Jamon Crudo y Queso', sector: 'FULL'},
+            {sku: '7798024760354', description: 'Pebete Top Jamon y Queso', sector: 'FULL'},
+            {sku: '7798024760484', description: 'Triple Miga Negro Jamon Crudo y Queso x3Un', sector: 'FULL'},
+            {sku: '7798024760477', description: 'Triple Miga Negro Jamon y Queso x3Un', sector: 'FULL'},
+            {sku: '7790387120363', description: 'Mate Listo Taragui 1 Un', sector: 'GONDOLAS'},
+            {sku: '7790387120370', description: 'Termo Taragui descartable 1 Un', sector: 'GONDOLAS'},
+            {sku: '7790387015324', description: 'Yerba Mananita 500 Gr', sector: 'GONDOLAS'},
+            {sku: '7790411001606', description: 'Yerba Rosamonte 250 Gr', sector: 'GONDOLAS'},
+            {sku: '7790387013627', description: 'Yerba Taragui 500 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968912783', description: 'Mix Full Balanceado 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968912790', description: 'Mix Full Balanceado 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968911953', description: 'Mix Full Clasico 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968001555', description: 'Mix Full Clasico 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968914862', description: 'Mix Full Del Bosque 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968914879', description: 'Mix Full Del bosque 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968911984', description: 'Mix Full Energetico 30 Gr', sector: 'GONDOLAS'},
+            {sku: '7790968001562', description: 'Mix Full Energetico 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7798171733010', description: 'Batatas Full 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7798171732945', description: 'Papas Full 60 Gr', sector: 'GONDOLAS'},
+            {sku: '7798171733270', description: 'Papas Full Chimi 20 Gr', sector: 'GONDOLAS'},
+            {sku: '7798171733256', description: 'Papas Full Chimi 55 Gr', sector: 'GONDOLAS'},
+            {sku: '7896004009193', description: 'Papas Pringles Crem/ceb 39 Gr', sector: 'GONDOLAS'},
+            {sku: '7896004009155', description: 'Papas Pringles Original 104 Gr', sector: 'GONDOLAS'},
+            {sku: '7896004009186', description: 'Papas Pringles Original 37 Gr', sector: 'GONDOLAS'},
+            {sku: '77564856', description: 'Pouches Nicotina VELO Menta 6 Mg', sector: 'MOSTRADOR'},
+            {sku: '77564849', description: 'Pouches Nicotina VELO Sandia 4 Mg', sector: 'MOSTRADOR'},
+            {sku: '77564870', description: 'Pouches Nicotina VELO Sandia 6 Mg', sector: 'MOSTRADOR'},
+            {sku: '77564832', description: 'Pouches Nicotina VELO Uva 4 Mg', sector: 'MOSTRADOR'},
+            {sku: '7798184230391', description: 'Caja Pañuelos Achiss Box', sector: 'MOSTRADOR'},
+            {sku: '7791519002649', description: 'Encendedor Shark 1 Un', sector: 'MOSTRADOR'},
+            {sku: '7791519003134', description: 'Maq Afeitar X-MART Speed 1', sector: 'MOSTRADOR'},
+            {sku: '7798184230032', description: 'Pañuelos Achiss x1Un', sector: 'MOSTRADOR'},
+            {sku: '41333001043', description: 'Pilas Duracell 9V 1 Un', sector: 'MOSTRADOR'},
+            {sku: '41333001005', description: 'Pilas Duracell AA 2 Un', sector: 'MOSTRADOR'},
+            {sku: '41333001029', description: 'Pilas Duracell AA 4 Un', sector: 'MOSTRADOR'},
+            {sku: '41333001074', description: 'Pilas Duracell AAA 2 Un', sector: 'MOSTRADOR'},
+            {sku: '41333001098', description: 'Pilas Duracell AAA 4 Un', sector: 'MOSTRADOR'},
+            {sku: '41333000992', description: 'Pilas Duracell C2 2 Un', sector: 'MOSTRADOR'},
+            {sku: '77975447', description: 'Pouches Nicotina VELO Menta 4 Mg', sector: 'MOSTRADOR'},
+            {sku: '77975614', description: 'Pouches Nicotina VELO Menta 6 Mg', sector: 'MOSTRADOR'},
+            {sku: '7791519200021', description: 'Preservativo Prime Anatomico 1 Un', sector: 'MOSTRADOR'},
+            {sku: '7791519200076', description: 'Preservativo Prime Espermicida 1 Un', sector: 'MOSTRADOR'},
+            {sku: '7791519702112', description: 'Preservativo Prime Retardante 1 Un', sector: 'MOSTRADOR'},
+            {sku: '7791519701856', description: 'Preservativo Prime Warming 1 Un', sector: 'MOSTRADOR'},
+            {sku: '7798422620014', description: 'Energizante Monster Energy Green 473 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798422620120', description: 'Energizante Monster Energy Pipeline Punch', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798422620021', description: 'Energizante Monster Energy Ultra 473 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798422620069', description: 'Energizante Monster Energy Watermelon 473 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798422620090', description: 'Energizante Monster Energy Zero 473 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '9002490100070', description: 'Energizante Red Bull 250 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '90435225', description: 'Energizante Red Bull 355 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '90415418', description: 'Energizante Red Bull Sugar Free 250 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798119220015', description: 'Energizante Speed 250 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798119220367', description: 'Energizante Speed Zero 250 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798119220381', description: 'Energizante Speed Zero 473 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895647659', description: 'Agua Benedictino S/Gas Pet 1.5 Lt', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895647772', description: 'Agua Benedictino Sin Gas 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7792799000639', description: 'Agua Eco de los Andes Sin Gas 1 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7792799000059', description: 'Agua Eco de los Andes Sin Gas 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7795930002097', description: 'Agua Eco de los Andes Sin Gas 850 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798062548679', description: 'Agua Saborizada Levite Pomelo 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790315000149', description: 'Agua Villa del Sur Sin Gas 1,65 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7799155000210', description: 'Agua Villavicencio Con Gas 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7799155000180', description: 'Agua Villavicencio Sin Gas 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7792170042005', description: 'Isotonica Gatorade Manzana 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7792170052271', description: 'Isotonica Gatorade Manzana 750 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895641183', description: 'Isotonica Powerade Frutas Tropicales 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895640025', description: 'Isotonica Powerade Mountain Blast 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895006029', description: 'Isotonica Powerade Mountain Blast 995 CC', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798140257431', description: 'Isotonica SUEROX Arandano - Pomelo 630 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798140257424', description: 'Isotonica SUEROX Manzana 630 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895643767', description: 'Jugo Ades Frutas Tropicales 200 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895643743', description: 'Jugo Ades Manzana 200 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895000720', description: 'Jugo Cepita Manzana 200 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895009815', description: 'Jugo Cepita Naranja 1 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895649301', description: 'Jugo Cepita Naranja 200 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798085682107', description: 'Jugo Citric Kids Multifruta 200 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798085681834', description: 'Jugo Citric Naranja 1 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798085681452', description: 'Jugo Citric Naranja 500 Cc', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798259439605', description: 'Jugo Pura Frutta Manzana 250 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798259439612', description: 'Jugo Pura Frutta Multifruta 250 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798290580083', description: 'Jugo TUTTI Manzana 200 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798290580113', description: 'Jugo TUTTI Multifruta 200 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798290581868', description: 'Jugo TUTTI Uva 200 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7655', description: 'Promo Dest Grito Gol Coca Pet 500 Ml', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '22707', description: 'Promo Gaming Coca-Cola Pet 500ml 1 Un', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '22818', description: 'Promo Samp Coca s/ Azu Pet 500 ml JU22', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895648847', description: 'Agua Benedictino Con Gas 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895647642', description: 'Agua Benedictino Sin Gas 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895648816', description: 'Agua Benedictino Sin Gas 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7792799000011', description: 'Agua Eco de los Andes Sin Gas 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895640452', description: 'Agua Saborizada Aquarius Manzana 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895640445', description: 'Agua Saborizada Aquarius Pera 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895640469', description: 'Agua Saborizada Aquarius Pomelo 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7799155001385', description: 'Agua Saborizada Levite Pomelo Rosado 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7798062540109', description: 'Agua Villa del Sur Sin Gas 600 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7799155000173', description: 'Agua Villavicencio Sin Gas 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895000782', description: 'Gaseosa Coca Cola 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895067532', description: 'Gaseosa Coca Cola Zero 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895000836', description: 'Gaseosa Fanta Naranja 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895002335', description: 'Gaseosa Fanta Zero 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7791813888406', description: 'Gaseosa Pepsi 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895000829', description: 'Gaseosa Sprite 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895064142', description: 'Gaseosa Sprite Zero 500 ML', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895640476', description: 'Agua Saborizada Aquarius Pera 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895000430', description: 'Gaseosa Coca Cola 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '7790895067556', description: 'Gaseosa Coca Cola Zero 1,5 LT', sector: 'HELADERA EXHIBIDORA'},
+            {sku: '25499', description: 'Vaso Full 1 Un', sector: 'INSUMOS'},
+            {sku: '24064', description: 'Plato de albondigas + Bonaqua 1 Un', sector: 'FULL'},
+            {sku: '32627', description: 'Bocaditos (10un) + Vaso Gase + papas', sector: 'FULL'},
+            {sku: '23628', description: 'Combo Ensalada Cheff + Gaseosa 500 Ml', sector: 'FULL'},
+            {sku: '33275', description: 'Combo Hamb Magna Mayo ahumada + Vaso d', sector: 'FULL'},
+            {sku: '33146', description: 'Combo Hamb NotChicken Crispy + Vaso de', sector: 'FULL'},
+            {sku: '33334', description: 'Promo x2 - 1 Combo NotcChicken Crispy +', sector: 'FULL'},
+            {sku: '32971', description: 'Combo Hamb c/hue y que + Vaso de Gaseosa', sector: 'FULL'},
+            {sku: '32968', description: 'Combo Hamb doble c/hue y que + Agua Bene', sector: 'FULL'},
+            {sku: '33017', description: 'Combo Hamb MAX Doble + Bened 600 Ml + Pa', sector: 'FULL'},
+            {sku: '33019', description: 'Combo Hamb MAX Doble + Vaso de gaseosa +', sector: 'FULL'},
+            {sku: '33028', description: 'Combo Hamb MAX Triple + Bened 600 Ml + P', sector: 'FULL'},
+            {sku: '33030', description: 'Combo Hamb MAX Triple + Vaso de gaseosa', sector: 'FULL'},
+            {sku: '24086', description: 'Combo Hamb Not Chicken BBQ + Agua + Papas', sector: 'FULL'},
+            {sku: '24151', description: 'Combo Hamb Not Chicken CRISPY BBQ + Bene', sector: 'FULL'},
+            {sku: '24152', description: 'Combo Hamb Not Chicken CRISPY BBQ + Bona', sector: 'FULL'},
+            {sku: '24153', description: 'Combo Hamb Not Chicken CRISPY BBQ + Vaso', sector: 'FULL'},
+            {sku: '24158', description: 'Combo Hamb Not Chicken CRISPY Guacamole', sector: 'FULL'},
+            {sku: '24159', description: 'Combo Hamb Not Chicken CRISPY Guacamole', sector: 'FULL'},
+            {sku: '24160', description: 'Combo Hamb Not Chicken CRISPY Guacamole', sector: 'FULL'},
+            {sku: '24161', description: 'Combo Hamb Not Chicken CRISPY Guacamole', sector: 'FULL'},
+            {sku: '24085', description: 'Combo Hamb NotChicken BBQ + Aquarius + Papas', sector: 'FULL'},
+            {sku: '24084', description: 'Combo Hamb NotChicken BBQ + Gaseosa + Papas', sector: 'FULL'},
+            {sku: '24157', description: 'Combo Hamb NotChicken Palta + Agua + Papas', sector: 'FULL'},
+            {sku: '24156', description: 'Combo Hamb NotChicken Palta + Aquarius + Papas', sector: 'FULL'},
+            {sku: '24155', description: 'Combo Hamb NotChicken Palta + Gaseosa + Papas', sector: 'FULL'},
+            {sku: '32683', description: 'Combo Plato Milanesa Napo STACC 1 Un + V', sector: 'FULL'},
+            {sku: '33382', description: 'DELI Combo Hamb Magna Guacamole + Bebida + Papas', sector: 'FULL'},
+            {sku: '24182', description: 'DELI Combo Hamb Not Chic CRIS BBQ + bebida + papas', sector: 'FULL'},
+            {sku: '24183', description: 'DELI Combo Hamb Not Chic CRIS Gua + Papas + Bebida', sector: 'FULL'},
+            {sku: '24083', description: 'Hamburguesa NotChicken Crispy BBQ', sector: 'FULL'},
+            {sku: '24069', description: 'Plato de Albondigas Portuguesas C/Arroz', sector: 'FULL'},
+            {sku: '24063', description: 'Plato de carre de cerdo c/pure + Aquarius', sector: 'FULL'},
+            {sku: '23500', description: 'Plato Milanesa napolitana c papas rustic', sector: 'FULL'},
+            {sku: '20493', description: 'Promo X4 - 2 Combo Magna guacamole + 2 Combo Campo', sector: 'FULL'},
+            {sku: '24207', description: 'Te p/llevar 240 cc + Alfajor Full', sector: 'FULL'},
+            {sku: '32760', description: 'Adicional Leche Almendras SILK', sector: 'FULL'},
+            {sku: '32157', description: 'BOXES Cafe con leche cortesia mediano', sector: 'FULL'},
+            {sku: '7793890261240', description: 'Pan Brioche 4 pulgadas - Fargo nuevo', sector: 'COCINA'},
+            {sku: '70899', description: 'Empanada  Especial (Un)', sector: 'COCINA'},
+            {sku: '70041', description: 'Roll crocante Lomito y BBQ (Ud) 1 Un', sector: 'COCINA'},
+            {sku: '7798024767063', description: 'Roll crocante Lomito y BBQ 1 Un', sector: 'COCINA'},
+            {sku: '70232', description: 'Medialuna (Ud)', sector: 'COCINA'},
+            {sku: '70751', description: 'Pastelito sabores varios (ud) 1 Un', sector: 'COCINA'},
+            {sku: '763571700556', description: 'Albondigas Portuguesas C/Arroz', sector: 'COCINA'},
+            {sku: '70910', description: 'Bocaditos de Pollo (4,8 Kg)', sector: 'COCINA'},
+            {sku: '763571700549', description: 'Carre cerdo mostaza miel c/pure', sector: 'COCINA'},
+            {sku: '70727', description: 'Donuts banada rellena ddl M Canuela (UD) 1 Un', sector: 'COCINA'},
+            {sku: '71016', description: 'Hamburguesa 125 Gr', sector: 'COCINA'},
+            {sku: '70301', description: 'Hamburguesa 80 Gr (Ud)', sector: 'COCINA'},
+            {sku: '7798024766639', description: 'Lasagna Bolognesa y Salsa Blanca', sector: 'COCINA'},
+            {sku: '7790360987891', description: 'Medallon Swift 56 Gr', sector: 'COCINA'},
+            {sku: '429', description: 'Medialuna Dulce LA FONTE', sector: 'COCINA'},
+            {sku: '70060', description: 'Mermelada Durazno 180 un - 22gr', sector: 'COCINA'},
+            {sku: '7798024760293', description: 'Milanesa Peceto Napolitana y papas rusticas', sector: 'COCINA'},
+            {sku: '70154', description: 'Pan brioche Icedream congelado', sector: 'COCINA'},
+            {sku: '7793890258578', description: 'Pan chico Fargo', sector: 'COCINA'},
+            {sku: '70426', description: 'Pan chico Icedream congelado 1 Un', sector: 'COCINA'},
+            {sku: '71224', description: 'Pan Rustico de Campo 1 Un', sector: 'COCINA'},
+            {sku: '70050', description: 'Papas Baston Horneables 9mm Mc Cain (Kg)', sector: 'COCINA'},
+            {sku: '70299', description: 'Plato Elaborado Pollo con Arroz (Ud)', sector: 'COCINA'},
+            {sku: '70771', description: 'Queso untable Elcor (UD)', sector: 'COCINA'},
+            {sku: '7798024766806', description: 'Risotto Calabaza', sector: 'COCINA'},
+            {sku: '70287', description: 'Roll Crocante de Jamon (Ud)', sector: 'COCINA'},
+            {sku: '70305', description: 'Roll Crocante de Peceto (Ud)', sector: 'COCINA'},
+            {sku: '70288', description: 'Roll Crocante de Pollo (Ud)', sector: 'COCINA'},
+            {sku: '70043', description: 'Roll crocante Lomito y BBQ (Ud)', sector: 'COCINA'},
+            {sku: '71257', description: 'Roll Crocante Veggie (Ud) 1 Un', sector: 'COCINA'},
+            {sku: '71203', description: 'Sandwich Milanesa (ud) 1 Un', sector: 'COCINA'},
+            {sku: '70085', description: 'Te Piramidal Be Berries', sector: 'FULL'},
+            {sku: '70091', description: 'Te piramidal Buenas vibras Chai', sector: 'FULL'},
+            {sku: '70086', description: 'Te piramidal Earl Grey', sector: 'FULL'},
+            {sku: '70071', description: 'Te saquito Chaman Chai ensobrado', sector: 'FULL'},
+            {sku: '70964', description: 'Te Saquito Clasico ensobrado Ilumine', sector: 'FULL'},
+            {sku: '70076', description: 'Te saquito Dulce Manzanilla', sector: 'FULL'},
+            {sku: '70079', description: 'Te saquito verde Silencio Andino', sector: 'FULL'},
+            {sku: '70093', description: 'Te verde piramidal Orange Green Love', sector: 'FULL'},
+            {sku: '71128', description: 'Tostada multicereal Icedream', sector: 'FULL'},
+            {sku: '70824', description: 'Trenzado Lomito y Queso (un)', sector: 'COCINA'},
+            {sku: '71043', description: 'Triangulo de Tostado Jamon y Queso (Ud)', sector: 'COCINA'},
+            {sku: '71102', description: 'Aceite Maiz (8cc) Abedul Sobre 198 Un', sector: 'COCINA'},
+            {sku: '70151', description: 'Aceto balsamico Abedul (8cc)198 Un', sector: 'COCINA'},
+            {sku: '71184', description: 'Caja de Panceta (2Kg) 1 Un', sector: 'COCINA'},
+            {sku: '70149', description: 'Caja de Panceta AFS (3.2Kg)', sector: 'COCINA'},
+            {sku: '70997', description: 'Caja de Panceta Fripasa (3.2Kg) 1 Un', sector: 'COCINA'},
+            {sku: '70277', description: 'Cebolla Crispy (Kg)', sector: 'COCINA'},
+            {sku: '70842', description: 'Cortesia', sector: 'COCINA'}
+          ];
         }
-      }
-    });
-  }
-});
 
-// Escáner con Cámara
-function toggleCameraScanner(){
-  $('camera-modal').style.display='flex';
-  html5QrCode=new Html5Qrcode("reader");
-  html5QrCode.start(
-    {facingMode:"environment"},
-    {fps:10,qrbox:{width:240,height:140}},
-    (decodedText)=>{
-      $('sku').value=decodedText;
-      const existe = onSkuInput();
-      stopCameraScanner();
-      if(existe){
-        $('quantity').focus();
-      }else{
-        $('description').focus();
-      }
-    },
-    ()=>{}
-  ).catch(err => {
-    toast("No se pudo acceder a la cámara");
-    $('camera-modal').style.display='none';
-  });
-}
+        // Lógica de sincronización automática de versión en localStorage
+        let storedVersion = localStorage.getItem(MK_VERSION_KEY);
+        let BASE_MAESTRO;
 
-function stopCameraScanner(){
-  if(html5QrCode){
-    html5QrCode.stop().then(()=>{
-      $('camera-modal').style.display='none';
-    }).catch(()=>{
-      $('camera-modal').style.display='none';
-    });
-  }else{
-    $('camera-modal').style.display='none';
-  }
-}
-
-// Gestión de productos
-function openProduct(id='', sector=''){
-  $('editId').value=id;
-  $('productForm').reset();
-  $('maestroNotice').classList.add('hidden');
-  
-  if(id){
-    $('productTitle').textContent='Editar vencimiento';
-    const p=products.find(x=>x.id===id);
-    if(p){
-      $('sku').value=p.sku||'';
-      $('description').value=p.description||'';
-      $('quantity').value=p.quantity||1;
-      $('expiry').value=p.expiry||'';
-      $('batch').value=p.batch||'';
-      $('sector').value=p.sector||SECTORS[0];
-      $('notes').value=p.notes||'';
-    }
-  }else{
-    $('productTitle').textContent='Cargar vencimiento';
-    if(sector){
-      $('sector').value=sector;
-    } else if(lockedSector){
-      $('sector').value=lockedSector;
-    }
-  }
-  show('product');
-}
-
-// Guardar producto
-document.getElementById('productForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const id=$('editId').value;
-  const sku=$('sku').value.trim();
-  const description=$('description').value.trim();
-  const quantity=parseInt($('quantity').value)||1;
-  const expiry=$('expiry').value;
-  const batch=$('batch').value.trim();
-  const sector=$('sector').value;
-  const notes=$('notes').value.trim();
-
-  if(!description || !expiry || !sector){
-    toast('Completá los campos obligatorios');
-    return;
-  }
-
-  // Si hay SKU y no está en el maestro, lo agregamos automáticamente (Auto-Catálogo)
-  if(sku && !BASE_MAESTRO.some(item => String(item.sku) === sku)){
-    BASE_MAESTRO.push({ sku, description, sector });
-    saveMaestro();
-  }
-
-  if(id){
-    const p=products.find(x=>x.id===id);
-    if(p){
-      p.sku=sku; p.description=description; p.quantity=quantity; p.expiry=expiry; p.batch=batch; p.sector=sector; p.notes=notes;
-    }
-    toast('Vencimiento actualizado');
-  }else{
-    products.push({
-      id: uid(),
-      sku, description, quantity, expiry, batch, sector, notes,
-      dateAdded: new Date().toISOString()
-    });
-    toast('Vencimiento registrado');
-  }
-
-  saveProducts();
-  updateMetrics();
-  show('home');
-});
-
-// Cálculos de estado de vencimiento
-function getStatus(expiryDate){
-  const today=new Date();
-  today.setHours(0,0,0,0);
-  const exp=new Date(expiryDate+'T00:00:00');
-  const diffTime=exp-today;
-  const diffDays=Math.ceil(diffTime/(1000*60*60*24));
-
-  if(diffDays<0) return 'vencido';
-  if(diffDays<=15) return 'critico';
-  if(diffDays<=30) return 'proximo';
-  return 'ok';
-}
-
-function updateMetrics(){
-  let v=0, c=0, p=0, t=products.length;
-  products.forEach(prod=>{
-    const st=getStatus(prod.expiry);
-    if(st==='vencido') v++;
-    else if(st==='critico') c++;
-    else if(st==='proximo') p++;
-  });
-  $('mv').textContent=v;
-  $('mc').textContent=c;
-  $('mp').textContent=p;
-  $('mt').textContent=t;
-}
-
-// Renderizado de productos
-function renderProducts(){
-  const list=$('productList');
-  const search=$('search').value.toLowerCase();
-  const stateFilter=$('stateFilter').value;
-  const sectorFilter=$('sectorFilter').value;
-
-  let html='';
-  const filtered=products.filter(p=>{
-    const st=getStatus(p.expiry);
-    const matchSearch=p.description.toLowerCase().includes(search) || (p.sku && p.sku.toLowerCase().includes(search));
-    const matchState= !stateFilter || st===stateFilter;
-    const matchSector= !sectorFilter || p.sector===sectorFilter;
-    return matchSearch && matchState && matchSector;
-  });
-
-  if(filtered.length===0){
-    list.innerHTML='<div class="empty">No se encontraron productos registrados.</div>';
-    return;
-  }
-
-  filtered.forEach(p=>{
-    const st=getStatus(p.expiry);
-    let badgeText='', badgeClass='';
-    if(st==='vencido'){badgeText='VENCIDO'; badgeClass='vencido';}
-    else if(st==='critico'){badgeText='CRÍTICO (≤15 días)'; badgeClass='critico';}
-    else if(st==='proximo'){badgeText='PRÓXIMO (16-30 días)'; badgeClass='proximo';}
-    else{badgeText='EN VIGOR'; badgeClass='proximo';}
-
-    html+=`
-      <div class="item">
-        <div>
-          <h3>${esc(p.description)}</h3>
-          <div class="meta">
-            ${p.sku?`<span class="badge-sku">SKU: ${esc(p.sku)}</span>`:''}
-            <span>Sector: <strong>${esc(p.sector)}</strong></span>
-            <span>Cant: <strong>${p.quantity}</strong></span>
-            <span>Vence: <strong>${p.expiry}</strong></span>
-            ${p.batch?`<span>Lote: ${esc(p.batch)}</span>`:''}
-          </div>
-          ${p.notes?`<p style="margin:6px 0 0;font-size:12px;color:var(--muted);">${esc(p.notes)}</p>`:''}
-        </div>
-        <div style="text-align:right">
-          <span class="badge ${badgeClass}">${badgeText}</span>
-          <div class="item-actions">
-            <button class="btn secondary small" onclick="openProduct('${p.id}')">Editar</button>
-            <button class="btn danger small" onclick="deleteProduct('${p.id}')">Eliminar</button>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  list.innerHTML=html;
-}
-
-function deleteProduct(id){
-  if(confirm('¿Eliminar este registro de vencimiento?')){
-    products=products.filter(x=>x.id!==id);
-    saveProducts();
-    updateMetrics();
-    renderProducts();
-    toast('Registro eliminado');
-  }
-}
-
-// Gestión de Usuarios y Login
-function initSelects(){
-  const sel=$('loginUser');
-  sel.innerHTML=users.filter(u=>u.active).map(u=>`<option value="${u.id}">${esc(u.name)} (${roleLabel(u.role)})</option>`).join('');
-  
-  const secSel=$('sector');
-  secSel.innerHTML=SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-  
-  const sf=$('sectorFilter');
-  sf.innerHTML=`<option value="">Todos los sectores</option>`+SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('');
-}
-
-function login(){
-  const uid=$('loginUser').value;
-  const pin=$('loginPin').value;
-  const user=users.find(u=>u.id===uid);
-
-  if(!user || user.pin!==pin){
-    toast('PIN incorrecto');
-    return;
-  }
-
-  current=user;
-  localStorage.setItem(SK, JSON.stringify(current));
-  $('loginPin').value='';
-  bootApp();
-}
-
-function logout(){
-  current=null;
-  localStorage.removeItem(SK);
-  $('login').classList.remove('hidden');
-  $('app').classList.add('hidden');
-}
-
-function bootApp(){
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  $('topName').textContent=current.name;
-  $('topRole').textContent=roleLabel(current.role);
-  $('avatar').textContent=current.name.charAt(0);
-
-  if(current.role==='supervisor'){
-    $('adminButton').style.display='block';
-  }else{
-    $('adminButton').style.display='none';
-  }
-
-  updateMetrics();
-  renderProducts();
-  renderUsers();
-}
-
-function show(viewId){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  $(viewId).classList.add('active');
-  if(viewId==='critical'){
-    renderProducts();
-  }
-}
-
-function openAccount(){
-  $('profileAvatar').textContent=current.name.charAt(0);
-  $('profileName').textContent=current.name;
-  $('profileRole').textContent=roleLabel(current.role);
-  $('profileSectors').textContent=current.sectors && current.sectors.length ? 'Sectores: '+current.sectors.join(', ') : '';
-  show('account');
-}
-
-function changeOwnPin(){
-  const newPin=prompt('Ingresá tu nuevo PIN (4 números):');
-  if(newPin && /^\d{4}$/.test(newPin)){
-    current.pin=newPin;
-    const u=users.find(x=>x.id===current.id);
-    if(u) u.pin=newPin;
-    saveUsers();
-    toast('PIN actualizado con éxito');
-  }else if(newPin){
-    toast('El PIN debe tener exactamente 4 números');
-  }
-}
-
-// Administración de usuarios
-function renderUsers(){
-  const list=$('userList');
-  list.innerHTML=users.map(u=>`
-    <div class="userrow ${u.active?'':'inactive'}">
-      <div>
-        <strong>${esc(u.name)}</strong>
-        <div style="font-size:11px;color:var(--muted)">PIN: ****</div>
-      </div>
-      <div><span class="role ${u.role}">${roleLabel(u.role)}</span></div>
-      <div><span style="font-size:12px">${u.active?'Activo':'Desactivado'}</span></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn secondary small" onclick="openUser('${u.id}')">Editar</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openUser(id=''){
-  $('userEditId').value=id;
-  $('userForm').reset();
-  if(id){
-    $('userTitle').textContent='Editar usuario';
-    const u=users.find(x=>x.id===id);
-    if(u){
-      $('userName').value=u.name;
-      $('userRole').value=u.role;
-      $('userPin').value=u.pin;
-      $('userActive').value=String(u.active);
-    }
-  }else{
-    $('userTitle').textContent='Crear usuario';
-  }
-  show('userFormView');
-}
-
-document.getElementById('userForm').addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const id=$('userEditId').value;
-  const name=$('userName').value.trim();
-  const role=$('userRole').value;
-  const pin=$('userPin').value.trim();
-  const active=$('userActive').value==='true';
-
-  if(!name || !pin){
-    toast('Completá los campos obligatorios');
-    return;
-  }
-
-  if(!/^\d{4}$/.test(pin)){
-    toast('El PIN debe tener 4 dígitos numéricos');
-    return;
-  }
-
-  if(id){
-    const u=users.find(x=>x.id===id);
-    if(u){
-      u.name=name; u.role=role; u.pin=pin; u.active=active;
-    }
-    toast('Usuario actualizado');
-  }else{
-    users.push({
-      id: uid(),
-      name, role, pin, active, sectors:[]
-    });
-    toast('Usuario creado');
-  }
-
-  saveUsers();
-  renderUsers();
-  show('users');
-});
-
-// Inicialización general al cargar la página
-window.addEventListener('DOMContentLoaded', ()=>{
-  initSelects();
-  const savedSession=localStorage.getItem(SK);
-  if(savedSession){
-    try{
-      current=JSON.parse(savedSession);
-      const found=users.find(u=>u.id===current.id);
-      if(found && found.active){
-        current=found;
-        bootApp();
-      }else{
-        logout();
-      }
-    }catch(e){
-      logout();
-    }
-  }
-});
-</script>
+        if (storedVersion !== CURRENT_VERSION) {
+            BASE_MAESTRO = defaultMaestro();
+            localStorage.setItem(MK, JSON.stringify(BASE_MAESTRO));
+            localStorage.setItem(MK_VERSION_KEY, CURRENT_VERSION);
+        } else {
+            BASE_MAESTRO = JSON.parse(localStorage.getItem(MK)) || defaultMaestro();
+        }
+    </script>
 </body>
 </html>
