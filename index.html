@@ -1,730 +1,342 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#071a33">
-<title>Control de Vencimientos | MAR DEL PLATA TEJEDOR</title>
-
-<!-- Librerías Externas -->
-<script src="https://unpkg.com/html5-qrcode"></script>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-<style>
-:root{--navy:#071a33;--navy2:#0d315d;--blue:#146bcc;--bg:#f1f5f9;--card:#fff;--text:#172033;--muted:#667085;--line:#d8e0ea;--red:#c62828;--orange:#ee6c00;--green:#16824a;--purple:#673ab7;--shadow:0 10px 30px rgba(13,35,65,.1)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at top,#235d99 0,#0c2e55 38%,#06172c 100%)}.login-card{width:min(440px,100%);background:#fff;border-radius:27px;padding:27px;box-shadow:0 25px 70px #0005}.logo{width:62px;height:62px;border-radius:19px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);display:grid;place-items:center;color:#fff;font-weight:900;font-size:28px;margin-bottom:18px}.login h1{margin:0;font-size:27px}.station{color:var(--blue);font-weight:900;margin:6px 0}.sub{color:var(--muted);line-height:1.5;font-size:14px}.field{margin-top:15px}label{font-size:13px;font-weight:800;display:block;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--text);outline:none}input:focus,select:focus,textarea:focus{border-color:#4b91e5;box-shadow:0 0 0 3px #146bcc1f}.pin{font-size:23px;letter-spacing:8px;text-align:center}.login-btn,.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:850}.login-btn{width:100%;margin-top:18px;background:var(--blue);color:#fff}
-.top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:13px 18px;position:sticky;top:0;z-index:30;box-shadow:0 5px 18px #0003}.top-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand h1{margin:0;font-size:19px}.brand small{color:#bad0e8}.userbox{display:flex;align-items:center;gap:9px}.uinfo{text-align:right}.uinfo strong{display:block;font-size:13px}.uinfo span{font-size:11px;color:#bad0e8}.avatar{width:42px;height:42px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--navy);font-weight:900;font-size:16px;transition:.2s;box-shadow:0 4px 12px #0003}.avatar:hover,.avatar:focus{transform:scale(1.07);box-shadow:0 0 0 4px #ffffff40}.logout{background:#ffffff16;border:1px solid #ffffff35;color:#fff;border-radius:10px;padding:9px 11px}
-main{max-width:1180px;margin:auto;padding:20px 16px 90px}.view{display:none}.view.active{display:block}.welcome{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}.welcome h2{margin:0;font-size:clamp(24px,5vw,36px)}.welcome p{margin:5px 0 0;color:var(--muted)}.sync{font-size:12px;color:var(--muted)}
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.action{border:0;border-radius:20px;min-height:145px;padding:21px;color:#fff;text-align:left;box-shadow:var(--shadow)}.action.blue{background:linear-gradient(135deg,#0d63c7,#1593e7)}.action.red{background:linear-gradient(135deg,#a91e22,#e44638)}.action.purple{background:linear-gradient(135deg,#4c2d97,#8256d5)}.action span{display:block;font-size:30px;margin-bottom:13px}.action strong{font-size:19px}.action small{display:block;opacity:.85;margin-top:7px;line-height:1.4}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.metric{background:#fff;border-radius:17px;padding:16px;border-left:5px solid #98a2b3;box-shadow:var(--shadow)}.metric.red{border-color:var(--red)}.metric.orange{border-color:var(--orange)}.metric.yellow{border-color:#e0a800}.metric.green{border-color:var(--green)}.metric b{font-size:28px;display:block}.metric small{color:var(--muted)}
-.card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.small{padding:7px 10px;font-size:11px}.sector-banner{background:#e9f4ff;border:1px solid #aed2f5;color:#124f84;border-radius:13px;padding:12px 14px;margin-bottom:14px;font-weight:800}
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:13px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:15px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px}.item h3{margin:0 0 7px;font-size:17px}.meta{display:flex;flex-wrap:wrap;gap:6px 13px;color:var(--muted);font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.vencido{background:#fde0e0;color:#a51b1b}.badge.critico{background:#ffe5d2;color:#ae4900}.badge.proximo{background:#fff1c0;color:#775600}.badge-sku{background:#e2e8f0;color:#334155;padding:2px 7px;border-radius:6px;font-weight:800;font-size:11px}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.empty{text-align:center;color:var(--muted);padding:35px}.notice{background:#eef6ff;border:1px solid #bfd8f5;color:#164f82;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}.warning{background:#fff5ce;border:1px solid #f0d46d;color:#6e5600;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}
-.userrow{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:9px}.role{font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px;display:inline-flex}.role.supervisor{background:#e9ddff;color:#563090}.role.responsable{background:#dceeff;color:#174c83}.role.encargado{background:#e5f5eb;color:#18633b}.inactive{opacity:.55}.checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.check{display:flex;gap:7px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px}.check input{width:auto}.profile{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}.profile-avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:28px;font-weight:900}.profile h3{margin:0 0 5px}.profile p{margin:3px 0;color:var(--muted)}.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,110px);background:#102943;color:#fff;border-radius:12px;padding:12px 17px;opacity:0;transition:.3s;z-index:100}.toast.show{opacity:1;transform:translate(-50%,0)}
-.input-group{display:flex;gap:8px}.input-group input{flex:1}
-#camera-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(7,26,51,0.85);z-index:1000;align-items:center;justify-content:center;padding:15px}
-#camera-modal-content{background:#fff;padding:20px;border-radius:20px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3)}
-#reader{width:100%;margin:12px 0;border-radius:12px;overflow:hidden;background:#000}
-.field-hint{font-size:12px;color:var(--orange);margin-top:5px;font-weight:700}
-@media(max-width:760px){.actions{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.grid,.filters,.userrow{grid-template-columns:1fr}.full{grid-column:auto}.welcome{align-items:start;flex-direction:column}.uinfo{display:none}.checkgrid{grid-template-columns:1fr 1fr}.item{grid-template-columns:1fr}.form-actions .btn{flex:1}.action{min-height:125px}.top{position:relative}.profile{grid-template-columns:1fr;text-align:center}.profile-avatar{margin:auto}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Vencimientos - YPF Tejedor</title>
+  <!-- Estilos y librerías base -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; min-height: 100vh; display: flex; flex-direction: column; }
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+    h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+    .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .btn { background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background-color: var(--accent-hover); }
+    .btn-secondary { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+    .btn-secondary:hover { background-color: rgba(255,255,255,0.05); }
+    .hidden { display: none !important; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: var(--text-muted); }
+    input, select { width: 100%; padding: 10px 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-size: 1rem; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    .check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; }
+    .check input { width: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+    th { color: var(--text-muted); font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    footer { text-align: center; padding: 20px 0; margin-top: 30px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); }
+  </style>
 </head>
 <body>
 
-<section id="login" class="login">
-  <div class="login-card">
-    <div class="logo">V</div>
-    <h1>Control de Vencimientos</h1>
-    <div class="station">MAR DEL PLATA TEJEDOR</div>
-    <p class="sub" id="loginMessage">Ingresá tu usuario y PIN.</p>
-    <div class="field"><label>Usuario</label><input id="loginUser" type="text" placeholder="Ej: DIEGO" style="text-transform: uppercase;" autocomplete="username"></div>
-    <div class="field"><label>PIN</label><input id="loginPin" class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
-    <button class="login-btn" onclick="login()">Ingresar</button>
-    <div style="text-align:center; margin-top:20px; font-size:12px; color:var(--muted); border-top:1px solid var(--line); padding-top:14px;">
-      Creado por <b>Diego Falbo</b> & <b>Gemini</b>
+  <div class="container">
+    <header>
+      <h1>YPF Tejedor - Control de Vencimientos</h1>
+      <div id="userNavSection">
+        <button class="btn btn-secondary" onclick="openAccount()">Mi Cuenta</button>
+      </div>
+    </header>
+
+    <!-- Vista de Usuarios / Panel Principal -->
+    <div id="usersView" class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2>Gestión de Usuarios</h2>
+        <button class="btn" onclick="openUser()">+ Nuevo Usuario</button>
+      </div>
+      <div id="usersTableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Sectores</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- Dinámico -->
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-</section>
 
-<div id="app" class="hidden">
-  <header class="top">
-    <div class="top-inner">
-      <div class="brand">
-        <h1>Control de Vencimientos</h1>
-        <small>MAR DEL PLATA TEJEDOR · v2.5 Nube · Por Diego Falbo & Gemini</small>
-      </div>
-      <div class="userbox">
-        <div class="uinfo"><strong id="topName"></strong><span id="topRole"></span></div>
-        <button class="avatar" id="avatar" onclick="openAccount()" title="Mi cuenta" aria-label="Abrir Mi cuenta"></button>
-        <button class="logout" onclick="logout()">Salir</button>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- Inicio / Panel Principal -->
-    <section id="home" class="view active">
-      <div class="welcome">
-        <div><h2 id="greeting">Panel principal</h2><p>Registrá vencimientos y controlá los productos que requieren atención.</p></div>
-        <span class="sync">Sincronizado en la nube</span>
-      </div>
-      <div class="actions">
-        <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
-        <button class="action red" onclick="show('critical')"><span>!</span><strong>Ver críticos</strong><small>Vencidos y productos que vencen dentro de 15 días.</small></button>
-        <button id="adminButton" class="action purple" onclick="show('users')"><span>⚙</span><strong>Administrar usuarios</strong><small>Crear, modificar, asignar roles y restablecer PIN.</small></button>
-      </div>
-      <div class="metrics">
-        <div class="metric red"><b id="mv">0</b><small>Vencidos</small></div>
-        <div class="metric orange"><b id="mc">0</b><small>Críticos: 0 a 15 días</small></div>
-        <div class="metric yellow"><b id="mp">0</b><small>Próximos: 16 a 30 días</small></div>
-        <div class="metric green"><b id="mt">0</b><small>Registros activos</small></div>
-      </div>
-    </section>
-
-    <!-- Mi Cuenta -->
-    <section id="account" class="view">
-      <div class="head"><h2>Mi cuenta</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="card">
-        <div class="profile">
-          <div class="profile-avatar" id="profileAvatar"></div>
-          <div><h3 id="profileName"></h3><p id="profileRole"></p><p id="profileSectors"></p></div>
+    <!-- Formulario de Usuario -->
+    <div id="userFormView" class="card hidden">
+      <h2 id="userTitle" style="margin-bottom: 16px;">Crear usuario</h2>
+      <form id="userForm">
+        <input type="hidden" id="userEditId">
+        <div class="form-group">
+          <label>Nombre y Apellido</label>
+          <input type="text" id="userName" required placeholder="Ej: JUAN PEREZ">
         </div>
-        <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
-        <p class="sub">Podés modificar tu PIN cuando quieras. El PIN debe tener cuatro números.</p>
-        <button class="btn secondary" onclick="changeOwnPin()">Cambiar mi PIN</button>
-      </div>
-    </section>
-
-    <!-- Cargar Vencimiento -->
-    <section id="product" class="view">
-      <div class="head"><h2 id="productTitle">Cargar vencimiento</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div id="sectorBanner" class="sector-banner hidden"></div>
-
-      <div class="card">
-        <form id="productForm">
-          <input type="hidden" id="editId">
-          <div class="grid">
-            <div class="full">
-              <label>Código SKU / EAN (Escáner)</label>
-              <div class="input-group">
-                <input id="sku" placeholder="Ingresá o escaneá el código" oninput="onSkuInput()" autocomplete="off">
-                <button type="button" class="btn purple" onclick="toggleCameraScanner()">📷 Cámara</button>
-              </div>
-              <div id="maestroNotice" class="field-hint hidden">
-                ⚠️ Producto nuevo. Al guardar el vencimiento se registrará automáticamente en la base maestra.
-              </div>
-            </div>
-            <div class="full"><label>Descripción *</label><input id="description" required placeholder="Nombre del producto"></div>
-            <div><label>Cantidad *</label><input id="quantity" type="number" min="1" value="1" required></div>
-            <div><label>Vencimiento *</label><input id="expiry" type="date" required></div>
-            <div><label>Lote</label><input id="batch"></div>
-            <div><label>Sector *</label><select id="sector" required></select></div>
-            <div class="full"><label>Observaciones</label><textarea id="notes" rows="3"></textarea></div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" onclick="show('home')">Cancelar</button>
-            <button class="btn primary">Guardar Vencimiento</button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Productos Críticos -->
-    <section id="critical" class="view">
-      <div class="head"><h2>Productos críticos</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="warning">Crítico: entre hoy y 15 días. Próximo: entre 16 y 30 días.</div>
-      <div class="card">
-        <div class="filters">
-          <input id="search" placeholder="Buscar por descripción o SKU..." oninput="renderProducts()">
-          <select id="stateFilter" onchange="renderProducts()">
-            <option value="">Todos los estados</option>
-            <option value="vencido">Vencidos</option>
-            <option value="critico">Críticos</option>
-            <option value="proximo">Próximos</option>
+        <div class="form-group">
+          <label>Rol</label>
+          <select id="userRole" onchange="toggleSectorAssignment()">
+            <option value="master">Master (Acceso Total)</option>
+            <option value="admin">Administrador</option>
+            <option value="responsable">Responsable de Sector</option>
+            <option value="encargado">Encargado</option>
           </select>
-          <select id="sectorFilter" onchange="renderProducts()"></select>
         </div>
-        <div id="productList" class="list"></div>
-      </div>
-    </section>
-
-    <!-- Administrar Usuarios -->
-    <section id="users" class="view">
-      <div class="head"><h2>Administrar usuarios</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="notice">Disponible únicamente para supervisores. Los usuarios desactivados conservan su historial.</div>
-      <div class="card">
-        <button class="btn primary" onclick="openUser()">＋ Crear usuario</button>
-        <div id="userList" style="margin-top:15px"></div>
-      </div>
-    </section>
-
-    <!-- Formulario Crear/Editar Usuario -->
-    <section id="userFormView" class="view">
-      <div class="head"><h2 id="userTitle">Crear usuario</h2><button class="back" onclick="show('users')">← Volver</button></div>
-      <div class="card">
-        <form id="userForm">
-          <input type="hidden" id="userEditId">
-          <div class="grid">
-            <div><label>Nombre *</label><input id="userName" required style="text-transform: uppercase;"></div>
-            <div><label>Rol *</label>
-              <select id="userRole" onchange="toggleSectorAssignment()">
-                <option value="encargado">Encargado</option>
-                <option value="responsable">Responsable de sector</option>
-                <option value="supervisor">Supervisor</option>
-              </select>
-            </div>
-            <div><label>PIN inicial / nuevo PIN *</label><input id="userPin" type="password" inputmode="numeric" maxlength="4" required></div>
-            <div><label>Estado</label>
-              <select id="userActive">
-                <option value="true">Activo</option>
-                <option value="false">Desactivado</option>
-              </select>
-            </div>
-            <div id="sectorAssignment" class="full hidden"><label>Sectores asignados</label><div id="sectorChecks" class="checkgrid"></div></div>
+        <div class="form-group" id="sectorAssignment">
+          <label>Sectores asignados (Críticos: 0-30 días | Próximos: 31-45 días)</label>
+          <div id="sectorChecks" style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+            <!-- Generado por JS -->
           </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" onclick="show('users')">Cancelar</button>
-            <button class="btn primary">Guardar usuario</button>
-          </div>
-        </form>
-      </div>
-    </section>
-  </main>
-</div>
+        </div>
+        <div class="form-group">
+          <label>PIN de Acceso (4 dígitos)</label>
+          <input type="text" id="userPin" maxlength="4" required value="2039">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="userActive">
+            <option value="true">Activo</option>
+            <option value="false">Inactivo</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn">Guardar</button>
+          <button type="button" class="btn btn-secondary" onclick="show('usersView')">Cancelar</button>
+        </div>
+      </form>
+    </div>
 
-<!-- Modal Visor de Cámara -->
-<div id="camera-modal">
-  <div id="camera-modal-content">
-    <h3 style="margin-bottom:8px;">Escanear Código de Barras</h3>
-    <div id="reader"></div>
-    <button class="btn danger" style="margin-top:10px;width:100%;" onclick="stopCameraScanner()">Cerrar Cámara</button>
+    <!-- Vista de Cuenta Personal -->
+    <div id="account" class="card hidden">
+      <h2>Mi Cuenta</h2>
+      <div style="display: flex; align-items: center; gap: 16px; margin: 20px 0;">
+        <div id="profileAvatar" style="width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">U</div>
+        <div>
+          <h3 id="profileName">-</h3>
+          <p id="profileRole" style="color: var(--text-muted);">-</p>
+          <p id="profileSectors" style="font-size: 0.9rem; margin-top: 4px; color: var(--warning);"></p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" onclick="changeOwnPin()">Cambiar PIN</button>
+        <button class="btn btn-secondary" onclick="show('usersView')">Volver</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<div id="toast" class="toast"></div>
+  <div id="toastContainer"></div>
 
-<script>
-// ==========================================
-// CONFIGURACIÓN DE FIREBASE
-// ==========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyD1M2MbISGNYxUgVkn9ER8VaWOeStQMZfw",
-  authDomain: "control-vencimientos-tej-be16d.firebaseapp.com",
-  projectId: "control-vencimientos-tej-be16d",
-  storageBucket: "control-vencimientos-tej-be16d.firebasestorage.app",
-  messagingSenderId: "999397504244",
-  appId: "1:999397504244:web:558ff48b752db8d8aa9aa1"
-};
+  <footer>
+    Desarrollado por <strong>Diego Falbo</strong> &amp; <span style="color: #60a5fa; font-weight: 600;">Gemini</span> ⚡
+  </footer>
 
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+  <script>
+    const SK = 'ypf_tejedor_session';
+    const SECTORS = ['Playas', 'Full', 'Boxes', 'Lubricantes'];
+    let users = [];
+    let current = null;
 
-const SECTORS=['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
-const SK='cv_session_v22';
+    function $(id) { return document.getElementById(id); }
 
-let current=null,lockedSector='',pendingRoute={view:'home',sector:''};
-let html5QrCode=null;
-
-let users=[];
-let products=[];
-let BASE_MAESTRO=[];
-
-const $=x=>document.getElementById(x);
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
-function roleLabel(r){return r==='supervisor'?'Supervisor':r==='responsable'?'Responsable de sector':'Encargado'}
-
-// ==========================================
-// SINCRONIZACIÓN EN TIEMPO REAL CON FIRESTORE
-// ==========================================
-function initFirebaseSync() {
-  db.collection('users').onSnapshot(snapshot => {
-    if (snapshot.empty) {
-      const defaults = [
-        {id:'diego',name:'DIEGO',pin:'2039',role:'supervisor',active:true,sectors:[]},
-        {id:'yesica',name:'YESICA',pin:'2039',role:'supervisor',active:true,sectors:[]},
-        {id:'lucas',name:'LUCAS',pin:'2039',role:'supervisor',active:true,sectors:[]},
-        {id:'marcos',name:'MARCOS',pin:'2039',role:'encargado',active:true,sectors:[]},
-        {id:'daiana',name:'DAIANA',pin:'2039',role:'encargado',active:true,sectors:[]},
-        {id:'agustin',name:'AGUSTIN',pin:'2039',role:'encargado',active:true,sectors:[]}
-      ];
-      defaults.forEach(u => db.collection('users').doc(u.id).set(u));
-    } else {
-      users = [];
-      snapshot.forEach(doc => users.push(doc.data()));
-      if(current && current.role === 'supervisor') renderUsers();
+    function show(viewId) {
+      ['usersView', 'userFormView', 'account'].forEach(id => {
+        const el = $(id);
+        if (el) el.classList.add('hidden');
+      });
+      const target = $(viewId);
+      if (target) target.classList.remove('hidden');
     }
-  });
 
-  db.collection('products').onSnapshot(snapshot => {
-    products = [];
-    snapshot.forEach(doc => {
-      products.push({ id: doc.id, ...doc.data() });
-    });
-    if(typeof renderMetrics === 'function') renderMetrics();
-    if(typeof renderProducts === 'function') renderProducts();
-  });
+    function toast(msg) {
+      const c = $('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
 
-  db.collection('maestro').onSnapshot(snapshot => {
-    BASE_MAESTRO = [];
-    snapshot.forEach(doc => {
-      BASE_MAESTRO.push({ id: doc.id, ...doc.data() });
-    });
-  });
-}
+    function roleLabel(role) {
+      if (role === 'master') return 'Master (Acceso Total)';
+      if (role === 'admin') return 'Administrador';
+      if (role === 'responsable') return 'Responsable de Sector';
+      return 'Encargado';
+    }
 
-async function saveUserToFirestore(u) {
-  await db.collection('users').doc(u.id).set(u);
-}
+    function esc(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
-async function saveProductToFirestore(p) {
-  if(!p.id) p.id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
-  await db.collection('products').doc(p.id).set(p);
-}
+    // Lógica de cálculo de vencimientos (Críticos: 0 a 30 días | Próximos: 31 a 45 días)
+    function getExpirationCategory(daysLeft) {
+      if (daysLeft <= 30) return 'critico'; 
+      if (daysLeft <= 45) return 'proximo'; 
+      return 'normal';
+    }
 
-async function deleteProductFromFirestore(id) {
-  await db.collection('products').doc(id).delete();
-}
+    async function toggleUserActive(id) {
+      const u = users.find(x => x.id === id);
+      if (!u) return;
+      u.active = !u.active;
+      await saveUserToFirestore(u);
+      toast(`Usuario ${u.active ? 'activado' : 'desactivado'}`);
+      renderUsersTable();
+    }
 
-async function saveMaestroToFirestore(item) {
-  const maestroId = String(item.sku);
-  await db.collection('maestro').doc(maestroId).set(item);
-}
+    function openUser(id = null) {
+      $('userEditId').value = '';
+      $('userName').value = '';
+      $('userRole').value = 'master';
+      $('userPin').value = '2039';
+      $('userActive').value = 'true';
+      buildSectorChecks([]);
 
-// --- GESTIÓN DE USUARIOS Y SESIÓN ---
+      if (id) {
+        const u = users.find(x => x.id === id);
+        if (u) {
+          $('userEditId').value = u.id;
+          $('userName').value = u.name;
+          $('userRole').value = u.role;
+          $('userPin').value = u.pin;
+          $('userActive').value = String(u.active);
+          buildSectorChecks(u.sectors || []);
+        }
+        $('userTitle').textContent = 'Editar usuario';
+      } else {
+        $('userTitle').textContent = 'Crear usuario';
+      }
+      toggleSectorAssignment();
+      show('userFormView');
+    }
 
-function login() {
-  const inputName = $('loginUser').value.trim().toUpperCase();
-  const pin = $('loginPin').value.trim();
+    function buildSectorChecks(selectedSectors = []) {
+      const container = $('sectorChecks');
+      if (!container) return;
+      container.innerHTML = SECTORS.map(s => `
+        <label class="check">
+          <input type="checkbox" name="userSector" value="${esc(s)}" ${selectedSectors.includes(s) ? 'checked' : ''}>
+          ${esc(s)}
+        </label>
+      `).join('');
+    }
 
-  if (!inputName) { toast('Ingresá tu usuario'); return; }
-  if (!pin) { toast('Ingresá el PIN'); return; }
+    function toggleSectorAssignment() {
+      const role = $('userRole').value;
+      const assignmentDiv = $('sectorAssignment');
+      if (assignmentDiv) {
+        if (role === 'responsable') {
+          assignmentDiv.classList.remove('hidden');
+        } else {
+          assignmentDiv.classList.add('hidden');
+        }
+      }
+    }
 
-  const user = users.find(u => u.name.toUpperCase() === inputName);
-  if (!user || !user.active) { toast('Usuario no válido o desactivado'); return; }
-  if (user.pin !== pin) { toast('PIN incorrecto'); return; }
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = $('userEditId').value;
+      const name = $('userName').value.trim().toUpperCase();
+      const role = $('userRole').value;
+      const pin = $('userPin').value.trim();
+      const active = $('userActive').value === 'true';
 
-  current = user;
-  localStorage.setItem(SK, JSON.stringify({ id: user.id, time: Date.now() }));
-  
-  $('loginPin').value = '';
-  $('loginUser').value = '';
-  setupInterface();
-  show('home');
-  toast(`¡Bienvenido, ${user.name}!`);
-}
+      const sectors = [];
+      if (role === 'responsable') {
+        document.querySelectorAll('input[name="userSector"]:checked').forEach(cb => {
+          sectors.push(cb.value);
+        });
+      }
 
-function logout() {
-  current = null;
-  localStorage.removeItem(SK);
-  $('loginPin').value = '';
-  $('loginUser').value = '';
-  $('login').classList.remove('hidden');
-  $('app').classList.add('hidden');
-  toast('Sesión cerrada');
-}
+      if (!name || !pin) {
+        toast('Completá los campos obligatorios');
+        return;
+      }
 
-function setupInterface() {
-  if (!current) return;
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
+      const userId = id || name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const userData = { id: userId, name, role, pin, active, sectors };
 
-  $('topName').textContent = current.name;
-  $('topRole').textContent = roleLabel(current.role);
-  $('avatar').textContent = current.name.charAt(0).toUpperCase();
-
-  const adminBtn = $('adminButton');
-  if (adminBtn) {
-    adminBtn.classList.toggle('hidden', current.role !== 'supervisor');
-  }
-
-  populateSectors();
-  if (typeof renderMetrics === 'function') renderMetrics();
-  if (typeof renderProducts === 'function') renderProducts();
-  if (current.role === 'supervisor' && typeof renderUsers === 'function') {
-    renderUsers();
-  }
-}
-
-function populateSectors() {
-  const sectorSelect = $('sector');
-  const sectorFilter = $('sectorFilter');
-
-  let optionsHtml = '<option value="">Seleccioná un sector...</option>';
-  SECTORS.forEach(s => { optionsHtml += `<option value="${esc(s)}">${esc(s)}</option>`; });
-  if (sectorSelect) sectorSelect.innerHTML = optionsHtml;
-  
-  let filterHtml = '<option value="">Todos los sectores</option>';
-  SECTORS.forEach(s => { filterHtml += `<option value="${esc(s)}">${esc(s)}</option>`; });
-  if (sectorFilter) sectorFilter.innerHTML = filterHtml;
-}
-
-function onSkuInput(){
-  const val=$('sku').value.trim();
-  const notice=$('maestroNotice');
-
-  if(!val){ notice.classList.add('hidden'); return false; }
-
-  const match=BASE_MAESTRO.find(item=>String(item.sku)===val);
-  if(match){
-    $('description').value=match.description;
-    notice.classList.add('hidden');
-    return true;
-  }else{
-    notice.classList.remove('hidden');
-    return false;
-  }
-}
-
-window.addEventListener('DOMContentLoaded', ()=>{
-  initFirebaseSync();
-  const skuInput = $('sku');
-  if(skuInput){
-    skuInput.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        const existe = onSkuInput();
-        if(existe){ $('quantity').focus(); } else { $('description').focus(); }
+      try {
+        await saveUserToFirestore(userData);
+        toast('Usuario guardado con éxito');
+        show('usersView');
+        renderUsersTable();
+      } catch (error) {
+        console.error("Error al guardar usuario:", error);
+        toast('Error: ' + error.message);
       }
     });
-  }
-});
 
-function toggleCameraScanner(){
-  $('camera-modal').style.display='flex';
-  html5QrCode=new Html5Qrcode("reader");
-  html5QrCode.start(
-    {facingMode:"environment"},
-    {fps:10,qrbox:{width:240,height:140}},
-    (decodedText)=>{
-      $('sku').value=decodedText;
-      const existe = onSkuInput();
-      stopCameraScanner();
-      if(existe){ $('quantity').focus(); } else { $('description').focus(); }
-    },
-    ()=>{}
-  ).catch(e => {
-    console.error("Error al iniciar la cámara:", e);
-    toast("No se pudo iniciar la cámara");
-    stopCameraScanner();
-  });
-}
-
-function stopCameraScanner(){
-  if(html5QrCode){
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear();
-      $('camera-modal').style.display='none';
-    }).catch(() => { $('camera-modal').style.display='none'; });
-  } else {
-    $('camera-modal').style.display='none';
-  }
-}
-
-document.getElementById('productForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = $('editId').value;
-  const sku = $('sku').value.trim();
-  const description = $('description').value.trim();
-  const quantity = parseInt($('quantity').value) || 1;
-  const expiry = $('expiry').value;
-  const batch = $('batch').value.trim();
-  const sector = $('sector').value;
-  const notes = $('notes').value.trim();
-
-  if(!description || !expiry || !sector){
-    toast('Completá los campos obligatorios');
-    return;
-  }
-
-  if(sku && !BASE_MAESTRO.some(item => String(item.sku) === sku)){
-    const newMaestroItem = { sku, description };
-    await saveMaestroToFirestore(newMaestroItem);
-  }
-
-  const productData = {
-    sku, description, quantity, expiry, batch, sector, notes,
-    updatedAt: new Date().toISOString(),
-    updatedBy: current.name
-  };
-
-  try {
-    if(id) {
-      productData.id = id;
-      await saveProductToFirestore(productData);
-      toast('Producto actualizado en la nube');
-    } else {
-      await saveProductToFirestore(productData);
-      toast('Vencimiento registrado con éxito');
+    function openAccount() {
+      if (!current) return;
+      $('profileAvatar').textContent = current.name.charAt(0).toUpperCase();
+      $('profileName').textContent = current.name;
+      $('profileRole').textContent = roleLabel(current.role);
+      $('profileSectors').textContent = current.sectors && current.sectors.length ? `Sectores: ${current.sectors.join(', ')}` : '';
+      show('account');
     }
 
-    $('productForm').reset();
-    $('editId').value = '';
-    $('maestroNotice').classList.add('hidden');
-    show('home');
-  } catch (error) {
-    console.error("Error al guardar producto:", error);
-    toast('Error: ' + error.message);
-  }
-});
-
-function renderMetrics(){
-  const today = new Date().toISOString().split('T')[0];
-  let v=0, c=0, p=0, t=products.length;
-
-  products.forEach(item => {
-    const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
-    if(diff < 0) v++;
-    else if(diff <= 15) c++;
-    else if(diff <= 30) p++;
-  });
-
-  $('mv').textContent = v;
-  $('mc').textContent = c;
-  $('mp').textContent = p;
-  $('mt').textContent = t;
-}
-
-function renderProducts(){
-  const container = $('productList');
-  if(!container) return;
-
-  const search = $('search').value.toLowerCase();
-  const stateFilter = $('stateFilter').value;
-  const sectorFilter = $('sectorFilter').value;
-  const today = new Date().toISOString().split('T')[0];
-
-  const filtered = products.filter(item => {
-    const matchesSearch = item.description.toLowerCase().includes(search) || (item.sku && item.sku.toLowerCase().includes(search));
-    const matchesSector = !sectorFilter || item.sector === sectorFilter;
-    
-    const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
-    let state = 'normal';
-    if(diff < 0) state = 'vencido';
-    else if(diff <= 15) state = 'critico';
-    else if(diff <= 30) state = 'proximo';
-
-    const matchesState = !stateFilter || state === stateFilter;
-    return matchesSearch && matchesSector && matchesState;
-  });
-
-  if(filtered.length === 0){
-    container.innerHTML = '<div class="empty">No hay registros que coincidan con los filtros.</div>';
-    return;
-  }
-
-  container.innerHTML = filtered.map(item => {
-    const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
-    let badgeClass = 'proximo', badgeText = `Vence en ${diff} días`;
-    if(diff < 0){ badgeClass = 'vencido'; badgeText = `Vencido hace ${Math.abs(diff)} días`; }
-    else if(diff === 0){ badgeClass = 'vencido'; badgeText = 'Vence hoy'; }
-    else if(diff <= 15){ badgeClass = 'critico'; badgeText = `Crítico (${diff} días)`; }
-
-    return `
-      <div class="item">
-        <div>
-          <h3>${esc(item.description)}</h3>
-          <div class="meta">
-            ${item.sku ? `<span class="badge-sku">SKU: ${esc(item.sku)}</span>` : ''}
-            <span>Cant: <b>${item.quantity}</b></span>
-            <span>Sector: <b>${esc(item.sector)}</b></span>
-            <span>Vencimiento: <b>${item.expiry}</b></span>
-            ${item.batch ? `<span>Lote: ${esc(item.batch)}</span>` : ''}
-          </div>
-          ${item.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:5px">Obs: ${esc(item.notes)}</div>` : ''}
-        </div>
-        <div style="text-align:right">
-          <span class="badge ${badgeClass}">${badgeText}</span>
-          <div class="item-actions">
-            <button class="btn secondary small" onclick="editProduct('${item.id}')">Editar</button>
-            <button class="btn danger small" onclick="removeProduct('${item.id}')">Eliminar</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function openProduct() {
-  $('editId').value = '';
-  $('productForm').reset();
-  $('maestroNotice').classList.add('hidden');
-  $('productTitle').textContent = 'Cargar vencimiento';
-  show('product');
-}
-
-function editProduct(id){
-  const item = products.find(x => x.id === id);
-  if(!item) return;
-  $('editId').value = item.id;
-  $('sku').value = item.sku || '';
-  $('description').value = item.description;
-  $('quantity').value = item.quantity;
-  $('expiry').value = item.expiry;
-  $('batch').value = item.batch || '';
-  $('sector').value = item.sector;
-  $('notes').value = item.notes || '';
-  $('productTitle').textContent = 'Editar vencimiento';
-  onSkuInput();
-  show('product');
-}
-
-async function removeProduct(id){
-  if(confirm('¿Estás seguro de eliminar este registro?')){
-    try {
-      await deleteProductFromFirestore(id);
-      toast('Producto eliminado');
-    } catch (error) {
-      console.error("Error al eliminar producto:", error);
-      toast('Error: ' + error.message);
+    async function changeOwnPin() {
+      const newPin = prompt("Ingresá tu nuevo PIN (4 números):");
+      if (!newPin) return;
+      if (newPin.length !== 4 || isNaN(newPin)) {
+        toast("El PIN debe tener exactamente 4 números");
+        return;
+      }
+      current.pin = newPin;
+      try {
+        await saveUserToFirestore(current);
+        toast("PIN actualizado correctamente");
+      } catch (error) {
+        toast("Error al actualizar el PIN");
+      }
     }
-  }
-}
 
-function show(viewId){
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const target = $(viewId);
-  if(target) target.classList.add('active');
-  window.scrollTo(0,0);
-}
-
-function renderUsers() {
-  const container = $('userList');
-  if (!container) return;
-
-  container.innerHTML = users.map(u => `
-    <div class="userrow ${u.active ? '' : 'inactive'}">
-      <div>
-        <strong>${esc(u.name)}</strong>
-        <div style="font-size:11px;color:var(--muted)">PIN: ${u.pin}</div>
-      </div>
-      <div><span class="role ${u.role}">${roleLabel(u.role)}</span></div>
-      <div><span style="font-size:12px;color:var(--muted)">${u.active ? 'Activo' : 'Desactivado'}</span></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn secondary small" onclick="openUser('${u.id}')">Editar</button>
-        <button class="btn ${u.active ? 'danger' : 'primary'} small" onclick="toggleUserActive('${u.id}')">${u.active ? 'Desactivar' : 'Activar'}</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function toggleUserActive(id) {
-  const u = users.find(x => x.id === id);
-  if (!u) return;
-  u.active = !u.active;
-  await saveUserToFirestore(u);
-  toast(`Usuario ${u.active ? 'activado' : 'desactivado'}`);
-}
-
-function openUser(id = null) {
-  $('userEditId').value = '';
-  $('userName').value = '';
-  $('userRole').value = 'encargado';
-  $('userPin').value = '2039';
-  $('userActive').value = 'true';
-  buildSectorChecks([]);
-
-  if (id) {
-    const u = users.find(x => x.id === id);
-    if (u) {
-      $('userEditId').value = u.id;
-      $('userName').value = u.name;
-      $('userRole').value = u.role;
-      $('userPin').value = u.pin;
-      $('userActive').value = String(u.active);
-      buildSectorChecks(u.sectors || []);
+    function renderUsersTable() {
+      const tbody = $('usersTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>${esc(u.name)}</strong></td>
+          <td>${roleLabel(u.role)}</td>
+          <td>${u.sectors && u.sectors.length ? u.sectors.join(', ') : '-'}</td>
+          <td><span style="color: ${u.active ? 'var(--success)' : 'var(--danger)'};">${u.active ? 'Activo' : 'Inactivo'}</span></td>
+          <td>
+            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85rem;" onclick="openUser('${u.id}')">Editar</button>
+            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85rem;" onclick="toggleUserActive('${u.id}')">${u.active ? 'Desactivar' : 'Activar'}</button>
+          </td>
+        </tr>
+      `).join('');
     }
-    $('userTitle').textContent = 'Editar usuario';
-  } else {
-    $('userTitle').textContent = 'Crear usuario';
-  }
-  toggleSectorAssignment();
-  show('userFormView');
-}
 
-function buildSectorChecks(selectedSectors = []) {
-  const container = $('sectorChecks');
-  if (!container) return;
-  container.innerHTML = SECTORS.map(s => `
-    <label class="check">
-      <input type="checkbox" name="userSector" value="${esc(s)}" ${selectedSectors.includes(s) ? 'checked' : ''}>
-      ${esc(s)}
-    </label>
-  `).join('');
-}
-
-function toggleSectorAssignment() {
-  const role = $('userRole').value;
-  const assignmentDiv = $('sectorAssignment');
-  if (assignmentDiv) {
-    if (role === 'responsable') {
-      assignmentDiv.classList.remove('hidden');
-    } else {
-      assignmentDiv.classList.add('hidden');
+    async function saveUserToFirestore(userData) {
+      const idx = users.findIndex(x => x.id === userData.id);
+      if (idx >= 0) users[idx] = userData;
+      else users.push(userData);
     }
-  }
-}
 
-document.getElementById('userForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = $('userEditId').value;
-  const name = $('userName').value.trim().toUpperCase();
-  const role = $('userRole').value;
-  const pin = $('userPin').value.trim();
-  const active = $('userActive').value === 'true';
-
-  const sectors = [];
-  if (role === 'responsable') {
-    document.querySelectorAll('input[name="userSector"]:checked').forEach(cb => {
-      sectors.push(cb.value);
+    window.addEventListener('load', () => {
+      // Diego configurado con rol Master por defecto
+      users = [
+        { id: 'diego', name: 'DIEGO FALBO', role: 'master', pin: '2039', active: true, sectors: [] },
+        { id: 'marcos', name: 'MARCOS', role: 'responsable', pin: '1234', active: true, sectors: ['Full', 'Boxes'] }
+      ];
+      current = users[0];
+      renderUsersTable();
     });
-  }
-
-  if (!name || !pin) {
-    toast('Completá los campos obligatorios');
-    return;
-  }
-
-  const userId = id || name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  const userData = { id: userId, name, role, pin, active, sectors };
-
-  try {
-    await saveUserToFirestore(userData);
-    toast('Usuario guardado con éxito');
-    show('users');
-  } catch (error) {
-    console.error("Error al guardar usuario:", error);
-    toast('Error: ' + error.message);
-  }
-});
-
-function openAccount() {
-  if (!current) return;
-  $('profileAvatar').textContent = current.name.charAt(0).toUpperCase();
-  $('profileName').textContent = current.name;
-  $('profileRole').textContent = roleLabel(current.role);
-  $('profileSectors').textContent = current.sectors && current.sectors.length ? `Sectores: ${current.sectors.join(', ')}` : '';
-  show('account');
-}
-
-async function changeOwnPin() {
-  const newPin = prompt("Ingresá tu nuevo PIN (4 números):");
-  if (!newPin) return;
-  if (newPin.length !== 4 || isNaN(newPin)) {
-    toast("El PIN debe tener exactamente 4 números");
-    return;
-  }
-  current.pin = newPin;
-  try {
-    await saveUserToFirestore(current);
-    toast("PIN actualizado correctamente");
-  } catch (error) {
-    toast("Error al actualizar el PIN");
-  }
-}
-</script>
+  </script>
 </body>
 </html>
