@@ -90,10 +90,9 @@
         <div class="form-group">
           <label>Rol</label>
           <select id="userRole" onchange="toggleSectorAssignment()">
-            <option value="master">Master (Acceso Total)</option>
-            <option value="admin">Administrador</option>
-            <option value="responsable">Responsable de Sector</option>
             <option value="encargado">Encargado</option>
+            <option value="responsable">Responsable</option>
+            <option value="admin">Administrador</option>
           </select>
         </div>
         <div class="form-group" id="sectorAssignment">
@@ -171,7 +170,6 @@
     }
 
     function roleLabel(role) {
-      if (role === 'master') return 'Master (Acceso Total)';
       if (role === 'admin') return 'Administrador';
       if (role === 'responsable') return 'Responsable de Sector';
       return 'Encargado';
@@ -183,8 +181,8 @@
 
     // Lógica de cálculo de vencimientos (Críticos: 0 a 30 días | Próximos: 31 a 45 días)
     function getExpirationCategory(daysLeft) {
-      if (daysLeft <= 30) return 'critico'; 
-      if (daysLeft <= 45) return 'proximo'; 
+      if (daysLeft <= 30) return 'critico'; // 0 a 30 días (y vencidos)
+      if (daysLeft <= 45) return 'proximo'; // 31 a 45 días
       return 'normal';
     }
 
@@ -200,7 +198,7 @@
     function openUser(id = null) {
       $('userEditId').value = '';
       $('userName').value = '';
-      $('userRole').value = 'master';
+      $('userRole').value = 'encargado';
       $('userPin').value = '2039';
       $('userActive').value = 'true';
       buildSectorChecks([]);
@@ -322,16 +320,18 @@
       `).join('');
     }
 
+    // Mock save function placeholder to integrate with your existing Firestore implementation
     async function saveUserToFirestore(userData) {
       const idx = users.findIndex(x => x.id === userData.id);
       if (idx >= 0) users[idx] = userData;
       else users.push(userData);
     }
 
+    // Inicialización de prueba local o carga con Firebase
     window.addEventListener('load', () => {
-      // Diego configurado con rol Master por defecto
+      // Datos de ejemplo para prueba visual inicial si no hay datos cargados
       users = [
-        { id: 'diego', name: 'DIEGO FALBO', role: 'master', pin: '2039', active: true, sectors: [] },
+        { id: 'diego', name: 'DIEGO FALBO', role: 'admin', pin: '2039', active: true, sectors: [] },
         { id: 'marcos', name: 'MARCOS', role: 'responsable', pin: '1234', active: true, sectors: ['Full', 'Boxes'] }
       ];
       current = users[0];
