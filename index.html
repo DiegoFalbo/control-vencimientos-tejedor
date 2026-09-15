@@ -45,21 +45,6 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
 </head>
 <body>
 
-<!-- Ícono SVG reutilizable de Gemini para las firmas -->
-<svg style="display:none">
-  <defs>
-    <linearGradient id="gemini-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ea4335"/>
-      <stop offset="30%" stop-color="#fbbc05"/>
-      <stop offset="60%" stop-color="#34a853"/>
-      <stop offset="100%" stop-color="#4285f4"/>
-    </linearGradient>
-    <g id="gemini-icon">
-      <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad)"></path>
-    </g>
-  </defs>
-</svg>
-
 <section id="login" class="login">
   <div class="login-card">
     <div class="logo">V</div>
@@ -73,7 +58,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
   <footer class="login-footer">
     Desarrollado por <strong>Diego Falbo</strong> &amp; 
     <span style="display:inline-flex; align-items:center; gap:4px; color:#fff; font-weight:600;">
-      <svg width="15" height="15" viewBox="0 0 24 24"><use href="#gemini-icon"/></svg> Gemini
+      <svg width="15" height="15" viewBox="0 0 24 24"><defs><linearGradient id="g-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ea4335"/><stop offset="30%" stop-color="#fbbc05"/><stop offset="60%" stop-color="#34a853"/><stop offset="100%" stop-color="#4285f4"/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#g-grad)"/></svg> Gemini
     </span>
   </footer>
 </section>
@@ -282,7 +267,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
   <footer style="text-align: center; padding: 20px 0; margin-top: auto; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:wrap;">
     Desarrollado por <strong>Diego Falbo</strong> &amp; 
     <span style="display:inline-flex; align-items:center; gap:4px; color: var(--blue); font-weight: 600;">
-      <svg width="15" height="15" viewBox="0 0 24 24"><use href="#gemini-icon"/></svg> Gemini
+      <svg width="15" height="15" viewBox="0 0 24 24"><defs><linearGradient id="g-grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ea4335"/><stop offset="30%" stop-color="#fbbc05"/><stop offset="60%" stop-color="#34a853"/><stop offset="100%" stop-color="#4285f4"/></linearGradient></defs><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#g-grad2)"/></svg> Gemini
     </span>
   </footer>
 </div>
@@ -391,8 +376,6 @@ function initFirebaseSync() {
     populateSectors();
     if (current && current.role === 'master') renderAdminSectors();
     if (typeof buildSectorChecks === 'function') {
-      const activeRole = $('userRole') ? $('userRole').value : 'encargado';
-      // Mantenemos los checks del formulario de usuarios actualizados
       const checkedVals = [];
       document.querySelectorAll('#sectorChecks input[type="checkbox"]:checked').forEach(cb => checkedVals.push(cb.value));
       buildSectorChecks(checkedVals);
