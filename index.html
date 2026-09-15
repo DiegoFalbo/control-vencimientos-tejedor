@@ -8,6 +8,8 @@
 
 <!-- Librerías Externas -->
 <script src="https://unpkg.com/html5-qrcode"></script>
+<!-- SheetJS para lectura de archivos Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -15,13 +17,16 @@
 <style>
 :root{--navy:#071a33;--navy2:#0d315d;--blue:#146bcc;--bg:#f1f5f9;--card:#fff;--text:#172033;--muted:#667085;--line:#d8e0ea;--red:#c62828;--orange:#ee6c00;--green:#16824a;--purple:#673ab7;--shadow:0 10px 30px rgba(13,35,65,.1)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh;}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at top,#235d99 0,#0c2e55 38%,#06172c 100%)}.login-card{width:min(440px,100%);background:#fff;border-radius:27px;padding:27px;box-shadow:0 25px 70px #0005}.logo{width:62px;height:62px;border-radius:19px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);display:grid;place-items:center;color:#fff;font-weight:900;font-size:28px;margin-bottom:18px}.login h1{margin:0;font-size:27px}.station{color:var(--blue);font-weight:900;margin:6px 0}.sub{color:var(--muted);line-height:1.5;font-size:14px}.field{margin-top:15px}label{font-size:13px;font-weight:800;display:block;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--text);outline:none}input:focus,select:focus,textarea:focus{border-color:#4b91e5;box-shadow:0 0 0 3px #146bcc1f}.pin{font-size:23px;letter-spacing:8px;text-align:center}.login-btn,.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:850}.login-btn{width:100%;margin-top:18px;background:var(--blue);color:#fff}
+.login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at top,#235d99 0,#0c2e55 38%,#06172c 100%)}.login-card{width:min(440px,100%);background:#fff;border-radius:27px;padding:27px;box-shadow:0 25px 70px #0005}.logo{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#0d6efd,#0dcaf0);display:grid;place-items:center;color:#fff;font-size:28px;font-weight:900;margin-bottom:18px;box-shadow:0 8px 20px rgba(13,110,253,0.3)}.login h1{margin:0;font-size:27px}.station{color:var(--blue);font-weight:900;margin:6px 0}.sub{color:var(--muted);line-height:1.5;font-size:14px}.field{margin-top:15px}label{font-size:13px;font-weight:800;display:block;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--text);outline:none}input:focus,select:focus,textarea:focus{border-color:#4b91e5;box-shadow:0 0 0 3px #146bcc1f}.pin{font-size:23px;letter-spacing:8px;text-align:center}.login-btn,.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:850}.login-btn{width:100%;margin-top:18px;background:var(--blue);color:#fff}
+.login-footer{margin-top:22px;text-align:center;font-size:0.85rem;color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;}.login-footer strong{color:#fff;}.login-footer span{color:#6ea8fe;font-weight:600;}
 .top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:13px 18px;position:sticky;top:0;z-index:30;box-shadow:0 5px 18px #0003}.top-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand h1{margin:0;font-size:19px}.brand small{color:#bad0e8}.userbox{display:flex;align-items:center;gap:9px}.uinfo{text-align:right}.uinfo strong{display:block;font-size:13px}.uinfo span{font-size:11px;color:#bad0e8}.avatar{width:42px;height:42px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--navy);font-weight:900;font-size:16px;transition:.2s;box-shadow:0 4px 12px #0003}.avatar:hover,.avatar:focus{transform:scale(1.07);box-shadow:0 0 0 4px #ffffff40}.logout{background:#ffffff16;border:1px solid #ffffff35;color:#fff;border-radius:10px;padding:9px 11px}
 #app{flex:1;display:flex;flex-direction:column;}
 main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.view{display:none}.view.active{display:block}.welcome{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}.welcome h2{margin:0;font-size:clamp(24px,5vw,36px)}.welcome p{margin:5px 0 0;color:var(--muted)}.sync{font-size:12px;color:var(--muted)}
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.action{border:0;border-radius:20px;min-height:145px;padding:21px;color:#fff;text-align:left;box-shadow:var(--shadow)}.action.blue{background:linear-gradient(135deg,#0d63c7,#1593e7)}.action.red{background:linear-gradient(135deg,#a91e22,#e44638)}.action.purple{background:linear-gradient(135deg,#4c2d97,#8256d5)}.action span{display:block;font-size:30px;margin-bottom:13px}.action strong{font-size:19px}.action small{display:block;opacity:.85;margin-top:7px;line-height:1.4}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.action{border:0;border-radius:20px;min-height:145px;padding:21px;color:#fff;text-align:left;box-shadow:var(--shadow)}.action.blue{background:linear-gradient(135deg,#0d63c7,#1593e7)}.action.red{background:linear-gradient(135deg,#a91e22,#e44638)}.action.purple{background:linear-gradient(135deg,#4c2d97,#8256d5)}.action.green{background:linear-gradient(135deg,#125e36,#1a8f4f)}.action span{display:block;font-size:30px;margin-bottom:13px}.action strong{font-size:17px}.action small{display:block;opacity:.85;margin-top:7px;line-height:1.4}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.metric{background:#fff;border-radius:17px;padding:16px;border-left:5px solid #98a2b3;box-shadow:var(--shadow)}.metric.red{border-color:var(--red)}.metric.orange{border-color:var(--orange)}.metric.yellow{border-color:#e0a800}.metric.green{border-color:var(--green)}.metric b{font-size:28px;display:block}.metric small{color:var(--muted)}
-.card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.small{padding:7px 10px;font-size:11px}.sector-banner{background:#e9f4ff;border:1px solid #aed2f5;color:#124f84;border-radius:13px;padding:12px 14px;margin-bottom:14px;font-weight:800}
+.card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.small{padding:7px 10px;font-size:11px}
+.btn-pdf{background:#ffebee;color:#c62828;border:1px solid #ffcdd2;border-radius:10px;padding:8px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:12px;}
+.sector-banner{background:#e9f4ff;border:1px solid #aed2f5;color:#124f84;border-radius:13px;padding:12px 14px;margin-bottom:14px;font-weight:800}
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:13px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:15px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px}.item h3{margin:0 0 7px;font-size:17px}.meta{display:flex;flex-wrap:wrap;gap:6px 13px;color:var(--muted);font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.vencido{background:#fde0e0;color:#a51b1b}.badge.critico{background:#ffe5d2;color:#ae4900}.badge.proximo{background:#fff1c0;color:#775600}.badge-sku{background:#e2e8f0;color:#334155;padding:2px 7px;border-radius:6px;font-weight:800;font-size:11px}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.empty{text-align:center;color:var(--muted);padding:35px}.notice{background:#eef6ff;border:1px solid #bfd8f5;color:#164f82;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}.warning{background:#fff5ce;border:1px solid #f0d46d;color:#6e5600;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}
 .userrow{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:9px}.role{font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px;display:inline-flex}.role.master{background:#fff3e0;color:#e65100;border: 1px solid #ffcc80}.role.supervisor{background:#e9ddff;color:#563090}.role.responsable{background:#dceeff;color:#174c83}.role.encargado{background:#e5f5eb;color:#18633b}.inactive{opacity:.55}.checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.check{display:flex;gap:7px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px}.check input{width:auto}.profile{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}.profile-avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:28px;font-weight:900}.profile h3{margin:0 0 5px}.profile p{margin:3px 0;color:var(--muted)}.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,110px);background:#102943;color:#fff;border-radius:12px;padding:12px 17px;opacity:0;transition:.3s;z-index:100}.toast.show{opacity:1;transform:translate(-50%,0)}
 .input-group{display:flex;gap:8px}.input-group input{flex:1}
@@ -29,10 +34,31 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
 #camera-modal-content{background:#fff;padding:20px;border-radius:20px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3)}
 #reader{width:100%;margin:12px 0;border-radius:12px;overflow:hidden;background:#000}
 .field-hint{font-size:12px;color:var(--orange);margin-top:5px;font-weight:700}
+@media print {
+  body { background: #fff; color: #000; }
+  .top, .actions, .form-actions, .filters, .item-actions, footer, .back, .btn, .logout { display: none !important; }
+  .card { box-shadow: none; border: none; padding: 0; }
+  .view { display: block !important; }
+}
 @media(max-width:760px){.actions{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.grid,.filters,.userrow{grid-template-columns:1fr}.full{grid-column:auto}.welcome{align-items:start;flex-direction:column}.uinfo{display:none}.checkgrid{grid-template-columns:1fr 1fr}.item{grid-template-columns:1fr}.form-actions .btn{flex:1}.action{min-height:125px}.top{position:relative}.profile{grid-template-columns:1fr;text-align:center}.profile-avatar{margin:auto}}
 </style>
 </head>
 <body>
+
+<!-- Ícono SVG reutilizable de Gemini para las firmas -->
+<svg style="display:none">
+  <defs>
+    <linearGradient id="gemini-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea4335"/>
+      <stop offset="30%" stop-color="#fbbc05"/>
+      <stop offset="60%" stop-color="#34a853"/>
+      <stop offset="100%" stop-color="#4285f4"/>
+    </linearGradient>
+    <g id="gemini-icon">
+      <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" fill="url(#gemini-grad)"></path>
+    </g>
+  </defs>
+</svg>
 
 <section id="login" class="login">
   <div class="login-card">
@@ -44,6 +70,12 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
     <div class="field"><label>PIN</label><input id="loginPin" class="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
     <button class="login-btn" onclick="login()">Ingresar</button>
   </div>
+  <footer class="login-footer">
+    Desarrollado por <strong>Diego Falbo</strong> &amp; 
+    <span style="display:inline-flex; align-items:center; gap:4px; color:#fff; font-weight:600;">
+      <svg width="15" height="15" viewBox="0 0 24 24"><use href="#gemini-icon"/></svg> Gemini
+    </span>
+  </footer>
 </section>
 
 <div id="app" class="hidden">
@@ -71,6 +103,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
       <div class="actions">
         <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
         <button class="action red" onclick="show('critical')"><span>!</span><strong>Ver críticos</strong><small>Vencidos y productos que vencen dentro de 30 días.</small></button>
+        <button class="action green" onclick="show('history')"><span>📋</span><strong>Historial de gestión</strong><small>Modificaciones, eliminaciones y cambios operativos.</small></button>
         <button id="adminButton" class="action purple" onclick="show('users')"><span>⚙</span><strong>Administrar usuarios</strong><small>Crear, modificar, asignar roles y restablecer PIN.</small></button>
       </div>
       <div class="metrics">
@@ -131,8 +164,17 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
 
     <!-- Productos Críticos -->
     <section id="critical" class="view">
-      <div class="head"><h2>Productos críticos</h2><button class="back" onclick="show('home')">← Volver</button></div>
-      <div class="warning">Crítico: entre hoy y 30 días. Próximo: entre 31 y 45 días.</div>
+      <div class="head">
+        <h2>Productos críticos</h2>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn-pdf" onclick="window.print()" title="Exportar a PDF">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            PDF
+          </button>
+          <button class="back" onclick="show('home')">← Volver</button>
+        </div>
+      </div>
+      <div class="warning">Crítico: entre hoy y 30 días. Próximo: entre 31 a 45 días.</div>
       <div class="card">
         <div class="filters">
           <input id="search" placeholder="Buscar por descripción o SKU..." oninput="renderProducts()">
@@ -148,10 +190,55 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
       </div>
     </section>
 
-    <!-- Administrar Usuarios -->
+    <!-- Historial de Actividad de Gestión -->
+    <section id="history" class="view">
+      <div class="head">
+        <h2>Historial de actividad de gestión</h2>
+        <button class="back" onclick="show('home')">← Volver</button>
+      </div>
+      <div class="notice">Registra modificaciones, eliminaciones y cambios operativos (excluyendo altas de productos). Accesible para encargados, supervisores y Master.</div>
+      <div class="card">
+        <div id="activityList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Administrar Usuarios, Base Maestra y Sectores -->
     <section id="users" class="view">
       <div class="head"><h2>Administrar usuarios</h2><button class="back" onclick="show('home')">← Volver</button></div>
       <div class="notice">Disponible únicamente para Master y Supervisores. Los usuarios desactivados conservan su historial.</div>
+      
+      <!-- Gestión de Sectores (Rol Master) -->
+      <div id="masterSectorsSection" class="card hidden">
+        <div class="head">
+          <h2>Gestión de Sectores</h2>
+          <span class="badge-sku" id="sectorsCount">0 Sectores</span>
+        </div>
+        <p class="sub" style="margin-top: -8px;">Personalizá y administrá los sectores disponibles en la estación. Exclusivo para el usuario <strong>Master</strong>.</p>
+        <div style="display:flex; gap:10px; margin-top:12px; margin-bottom:12px; flex-wrap:wrap;">
+          <input id="newSectorInput" placeholder="Nombre del nuevo sector..." style="flex:1; min-width:200px; text-transform:uppercase;">
+          <button class="btn primary" onclick="addNewSector()">＋ Agregar Sector</button>
+        </div>
+        <div id="sectorsListAdmin" style="display:grid; gap:8px;"></div>
+      </div>
+
+      <!-- Importación Masiva Excel (Rol Master) -->
+      <div id="masterExcelSection" class="card hidden">
+        <div class="head">
+          <h2>Base Maestra de Productos</h2>
+          <span class="badge-sku" id="maestroCount">0 SKUs</span>
+        </div>
+        <p class="sub" style="margin-top: -8px;">Carga masiva desde archivo Excel (.xlsx, .xls, .csv). Funcionalidad exclusiva para el usuario <strong>Master</strong>.</p>
+        <div class="warning" style="margin-top:12px; margin-bottom: 12px;">
+          💡 <strong>Estructura requerida:</strong> Columna A = <b>Código SKU / EAN</b> | Columna B = <b>Descripción del producto</b>.<br>
+          Esta actualización fusiona los códigos en la nube <b>sin borrar</b> los vencimientos ni registros operativos.
+        </div>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImport(event)">
+          <button class="btn primary" onclick="$('excelFile').click()">📥 Importar Excel (SKU y Descripción)</button>
+          <span id="excelStatus" style="font-size:12px; color:var(--muted); font-weight: 600;"></span>
+        </div>
+      </div>
+
       <div class="card">
         <button class="btn primary" onclick="openUser()">＋ Crear usuario</button>
         <div id="userList" style="margin-top:15px"></div>
@@ -192,8 +279,11 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
     </section>
   </main>
 
-  <footer style="text-align: center; padding: 20px 0; margin-top: auto; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line);">
-    Desarrollado por <strong>Diego Falbo</strong> &amp; <span style="color: var(--blue); font-weight: 600;">Gemini</span> ⚡
+  <footer style="text-align: center; padding: 20px 0; margin-top: auto; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); display:flex; align-items:center; justify-content:center; gap:4px; flex-wrap:wrap;">
+    Desarrollado por <strong>Diego Falbo</strong> &amp; 
+    <span style="display:inline-flex; align-items:center; gap:4px; color: var(--blue); font-weight: 600;">
+      <svg width="15" height="15" viewBox="0 0 24 24"><use href="#gemini-icon"/></svg> Gemini
+    </span>
   </footer>
 </div>
 
@@ -225,7 +315,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const SECTORS=['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
+let SECTORS = ['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
 const SK='cv_session_v22';
 
 let current=null,lockedSector='',pendingRoute={view:'home',sector:''};
@@ -234,6 +324,7 @@ let html5QrCode=null;
 let users=[];
 let products=[];
 let BASE_MAESTRO=[];
+let activityLogs=[];
 
 const $=x=>document.getElementById(x);
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -276,6 +367,36 @@ function initFirebaseSync() {
     snapshot.forEach(doc => {
       BASE_MAESTRO.push({ id: doc.id, ...doc.data() });
     });
+    const countEl = $('maestroCount');
+    if(countEl) countEl.textContent = `${BASE_MAESTRO.length} SKUs`;
+  });
+
+  db.collection('activity_log').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+    activityLogs = [];
+    snapshot.forEach(doc => {
+      activityLogs.push({ id: doc.id, ...doc.data() });
+    });
+    if(typeof renderActivityHistory === 'function') renderActivityHistory();
+  });
+
+  // Sincronización de Sectores
+  db.collection('config').doc('sectors').onSnapshot(doc => {
+    if (doc.exists && doc.data().list) {
+      SECTORS = doc.data().list;
+    } else {
+      const defaultSectors = ['W.I.C','CAMARA','DEPOSITO GALLETITAS','DEPOSITO GOLOSINAS','HELADERA EXHIBIDORA','HELADOS','CARAMELERA','GONDOLAS','INSUMOS'];
+      db.collection('config').doc('sectors').set({ list: defaultSectors });
+      SECTORS = defaultSectors;
+    }
+    populateSectors();
+    if (current && current.role === 'master') renderAdminSectors();
+    if (typeof buildSectorChecks === 'function') {
+      const activeRole = $('userRole') ? $('userRole').value : 'encargado';
+      // Mantenemos los checks del formulario de usuarios actualizados
+      const checkedVals = [];
+      document.querySelectorAll('#sectorChecks input[type="checkbox"]:checked').forEach(cb => checkedVals.push(cb.value));
+      buildSectorChecks(checkedVals);
+    }
   });
 }
 
@@ -288,13 +409,167 @@ async function saveProductToFirestore(p) {
   await db.collection('products').doc(p.id).set(p);
 }
 
-async function deleteProductFromFirestore(id) {
+async function deleteProductFromFirestore(id, productDesc) {
   await db.collection('products').doc(id).delete();
+  await logActivity('ELIMINACIÓN', `Se eliminó el producto "${productDesc}"`);
+}
+
+async function logActivity(actionType, details) {
+  const logData = {
+    action: actionType,
+    details: details,
+    user: current ? current.name : 'Sistema',
+    role: current ? roleLabel(current.role) : 'Sistema',
+    timestamp: new Date().toISOString()
+  };
+  await db.collection('activity_log').add(logData);
 }
 
 async function saveMaestroToFirestore(item) {
   const maestroId = String(item.sku);
   await db.collection('maestro').doc(maestroId).set(item);
+}
+
+// ==========================================
+// GESTIÓN DE SECTORES (ROL MASTER)
+// ==========================================
+function renderAdminSectors() {
+  const container = $('sectorsListAdmin');
+  const countEl = $('sectorsCount');
+  if(!container) return;
+  if(countEl) countEl.textContent = `${SECTORS.length} Sectores`;
+
+  container.innerHTML = SECTORS.map(s => `
+    <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line); border-radius:10px; padding:10px 14px; background:#fff;">
+      <strong>${esc(s)}</strong>
+      <div style="display:flex; gap:6px;">
+        <button class="btn secondary small" onclick="promptRenameSector('${esc(s)}')">Renombrar</button>
+        <button class="btn danger small" onclick="deleteSector('${esc(s)}')">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function addNewSector() {
+  if (!current || current.role !== 'master') {
+    toast('Acceso restringido: Solo el usuario Master puede gestionar sectores');
+    return;
+  }
+  const input = $('newSectorInput');
+  const val = input.value.trim().toUpperCase();
+  if(!val) { toast('Ingresá el nombre del sector'); return; }
+  if(SECTORS.includes(val)) { toast('El sector ya existe'); return; }
+
+  SECTORS.push(val);
+  await db.collection('config').doc('sectors').set({ list: SECTORS });
+  input.value = '';
+  toast('Sector agregado con éxito');
+}
+
+async function promptRenameSector(oldName) {
+  if (!current || current.role !== 'master') return;
+  const newName = prompt(`Renombrar sector "${oldName}" a:`, oldName);
+  if(!newName) return;
+  const formatted = newName.trim().toUpperCase();
+  if(!formatted || formatted === oldName) return;
+  if(SECTORS.includes(formatted)) { toast('Ya existe un sector con ese nombre'); return; }
+
+  const index = SECTORS.indexOf(oldName);
+  if(index !== -1) {
+    SECTORS[index] = formatted;
+    await db.collection('config').doc('sectors').set({ list: SECTORS });
+    toast('Sector renombrado con éxito');
+  }
+}
+
+async function deleteSector(sectorName) {
+  if (!current || current.role !== 'master') return;
+  if(SECTORS.length <= 1) {
+    toast('Debe haber al menos un sector activo');
+    return;
+  }
+  if(confirm(`¿Estás seguro de eliminar el sector "${sectorName}"?`)) {
+    SECTORS = SECTORS.filter(s => s !== sectorName);
+    await db.collection('config').doc('sectors').set({ list: SECTORS });
+    toast('Sector eliminado');
+  }
+}
+
+// ==========================================
+// IMPORTACIÓN DESDE ARCHIVO EXCEL (ROL MASTER)
+// ==========================================
+async function handleExcelImport(e) {
+  if (!current || current.role !== 'master') {
+    toast('Acceso restringido: Solo el usuario Master puede importar la base maestra');
+    return;
+  }
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const statusEl = $('excelStatus');
+  if (statusEl) statusEl.textContent = 'Procesando archivo...';
+  toast('Leyendo archivo Excel...');
+
+  const reader = new FileReader();
+  reader.onload = async (evt) => {
+    try {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+      if (!rows || rows.length === 0) {
+        toast('El archivo está vacío');
+        if (statusEl) statusEl.textContent = '';
+        return;
+      }
+
+      let updatedCount = 0;
+      let batch = db.batch();
+      let batchSize = 0;
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length < 2) continue;
+
+        let rawSku = String(row[0] || '').trim();
+        let rawDesc = String(row[1] || '').trim();
+
+        if (i === 0 && (rawSku.toUpperCase().includes('SKU') || rawSku.toUpperCase().includes('CODIGO') || rawDesc.toUpperCase().includes('DESCRIPCION'))) {
+          continue;
+        }
+
+        if (!rawSku || !rawDesc) continue;
+
+        const docRef = db.collection('maestro').doc(rawSku);
+        batch.set(docRef, { sku: rawSku, description: rawDesc }, { merge: true });
+        batchSize++;
+        updatedCount++;
+
+        if (batchSize === 450) {
+          await batch.commit();
+          batch = db.batch();
+          batchSize = 0;
+        }
+      }
+
+      if (batchSize > 0) {
+        await batch.commit();
+      }
+
+      toast(`¡Base Maestra actualizada! ${updatedCount} productos importados.`);
+      if (statusEl) statusEl.textContent = `Última carga: ${updatedCount} ítems (${new Date().toLocaleTimeString()})`;
+    } catch (err) {
+      console.error('Error al procesar Excel:', err);
+      toast('Error al leer el archivo Excel');
+      if (statusEl) statusEl.textContent = 'Error en la importación';
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  reader.readAsArrayBuffer(file);
 }
 
 // --- GESTIÓN DE USUARIOS Y SESIÓN ---
@@ -342,6 +617,17 @@ function setupInterface() {
   const adminBtn = $('adminButton');
   if (adminBtn) {
     adminBtn.classList.toggle('hidden', current.role !== 'supervisor' && current.role !== 'master');
+  }
+
+  const masterSectorsSection = $('masterSectorsSection');
+  if (masterSectorsSection) {
+    masterSectorsSection.classList.toggle('hidden', current.role !== 'master');
+    if (current.role === 'master') renderAdminSectors();
+  }
+
+  const masterExcelSection = $('masterExcelSection');
+  if (masterExcelSection) {
+    masterExcelSection.classList.toggle('hidden', current.role !== 'master');
   }
 
   populateSectors();
@@ -451,13 +737,14 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const productData = {
     sku, description, quantity, expiry, batch, sector, notes,
     updatedAt: new Date().toISOString(),
-    updatedBy: current.name
+    updatedBy: current ? current.name : 'Sistema'
   };
 
   try {
     if(id) {
       productData.id = id;
       await saveProductToFirestore(productData);
+      await logActivity('MODIFICACIÓN', `Se actualizó el producto "${description}" (${sector})`);
       toast('Producto actualizado en la nube');
     } else {
       await saveProductToFirestore(productData);
@@ -481,8 +768,8 @@ function renderMetrics(){
   products.forEach(item => {
     const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
     if(diff < 0) v++;
-    else if(diff <= 30) c++; // Crítico: 0 a 30
-    else if(diff <= 45) p++; // Próximo: 31 a 45
+    else if(diff <= 30) c++;
+    else if(diff <= 45) p++;
   });
 
   $('mv').textContent = v;
@@ -507,8 +794,8 @@ function renderProducts(){
     const diff = Math.ceil((new Date(item.expiry) - new Date(today)) / (1000 * 60 * 60 * 24));
     let state = 'normal';
     if(diff < 0) state = 'vencido';
-    else if(diff <= 30) state = 'critico'; // Crítico: 0 a 30
-    else if(diff <= 45) state = 'proximo'; // Próximo: 31 a 45
+    else if(diff <= 30) state = 'critico';
+    else if(diff <= 45) state = 'proximo';
 
     const matchesState = !stateFilter || state === stateFilter;
     return matchesSearch && matchesSector && matchesState;
@@ -543,8 +830,38 @@ function renderProducts(){
           <span class="badge ${badgeClass}">${badgeText}</span>
           <div class="item-actions">
             <button class="btn secondary small" onclick="editProduct('${item.id}')">Editar</button>
-            <button class="btn danger small" onclick="removeProduct('${item.id}')">Eliminar</button>
+            <button class="btn danger small" onclick="removeProduct('${item.id}', '${esc(item.description)}')">Eliminar</button>
           </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderActivityHistory() {
+  const container = $('activityList');
+  if(!container) return;
+
+  if(activityLogs.length === 0) {
+    container.innerHTML = '<div class="empty">No hay registros en el historial de actividad.</div>';
+    return;
+  }
+
+  container.innerHTML = activityLogs.map(log => {
+    const dateFormatted = log.timestamp ? new Date(log.timestamp).toLocaleString('es-AR') : '';
+    const badgeColor = log.action === 'ELIMINACIÓN' ? 'vencido' : 'critico';
+    return `
+      <div class="item">
+        <div>
+          <h3>${esc(log.details)}</h3>
+          <div class="meta">
+            <span>Usuario: <b>${esc(log.user)}</b></span>
+            <span>Rol: <b>${esc(log.role)}</b></span>
+            <span>Fecha: <b>${dateFormatted}</b></span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <span class="badge ${badgeColor}">${esc(log.action)}</span>
         </div>
       </div>
     `;
@@ -575,10 +892,10 @@ function editProduct(id){
   show('product');
 }
 
-async function removeProduct(id){
+async function removeProduct(id, description){
   if(confirm('¿Estás seguro de eliminar este registro?')){
     try {
-      await deleteProductFromFirestore(id);
+      await deleteProductFromFirestore(id, description);
       toast('Producto eliminado');
     } catch (error) {
       console.error("Error al eliminar producto:", error);
@@ -640,38 +957,34 @@ function openUser(id = null) {
       $('userActive').value = String(u.active);
       buildSectorChecks(u.sectors || []);
     }
-    $('userTitle').textContent = 'Editar usuario';
-  } else {
-    $('userTitle').textContent = 'Crear usuario';
   }
   toggleSectorAssignment();
   show('userFormView');
 }
 
-function buildSectorChecks(selectedSectors = []) {
-  const container = $('sectorChecks');
-  if (!container) return;
-  container.innerHTML = SECTORS.map(s => `
-    <label class="check">
-      <input type="checkbox" name="userSector" value="${esc(s)}" ${selectedSectors.includes(s) ? 'checked' : ''}>
-      ${esc(s)}
-    </label>
-  `).join('');
-}
-
 function toggleSectorAssignment() {
   const role = $('userRole').value;
-  const assignmentDiv = $('sectorAssignment');
-  if (assignmentDiv) {
-    if (role === 'responsable') {
-      assignmentDiv.classList.remove('hidden');
-    } else {
-      assignmentDiv.classList.add('hidden');
-    }
+  const sectorDiv = $('sectorAssignment');
+  if (role === 'responsable') {
+    sectorDiv.classList.remove('hidden');
+  } else {
+    sectorDiv.classList.add('hidden');
   }
 }
 
-// Cierre agregado para el formulario de usuarios y opciones de cuenta
+function buildSectorChecks(selectedSectors = []) {
+  const container = $('sectorChecks');
+  if (!container) return;
+  container.innerHTML = SECTORS.map(s => {
+    const checked = selectedSectors.includes(s) ? 'checked' : '';
+    return `
+      <label class="check">
+        <input type="checkbox" value="${esc(s)}" ${checked}> ${esc(s)}
+      </label>
+    `;
+  }).join('');
+}
+
 document.getElementById('userForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = $('userEditId').value;
@@ -680,10 +993,10 @@ document.getElementById('userForm').addEventListener('submit', async (e) => {
   const pin = $('userPin').value.trim();
   const active = $('userActive').value === 'true';
 
-  const sectors = [];
+  const selectedSectors = [];
   if (role === 'responsable') {
-    document.querySelectorAll('input[name="userSector"]:checked').forEach(cb => {
-      sectors.push(cb.value);
+    document.querySelectorAll('#sectorChecks input[type="checkbox"]:checked').forEach(cb => {
+      selectedSectors.push(cb.value);
     });
   }
 
@@ -692,12 +1005,12 @@ document.getElementById('userForm').addEventListener('submit', async (e) => {
     return;
   }
 
-  const userId = id || name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  const userData = { id: userId, name, role, pin, active, sectors };
+  const userId = id || name.toLowerCase().replace(/\s+/g, '');
+  const userData = { id: userId, name, role, pin, active, sectors: selectedSectors };
 
   try {
     await saveUserToFirestore(userData);
-    toast('Usuario guardado con éxito');
+    toast('Usuario guardado');
     show('users');
   } catch (error) {
     console.error("Error al guardar usuario:", error);
@@ -715,18 +1028,13 @@ function openAccount() {
 }
 
 async function changeOwnPin() {
-  const newPin = prompt("Ingresá tu nuevo PIN (4 números):");
-  if (!newPin) return;
-  if (newPin.length !== 4 || isNaN(newPin)) {
-    toast("El PIN debe tener exactamente 4 números");
-    return;
-  }
-  current.pin = newPin;
-  try {
+  const newPin = prompt('Ingresá tu nuevo PIN (4 dígitos):');
+  if (newPin && newPin.length === 4 && !isNaN(newPin)) {
+    current.pin = newPin;
     await saveUserToFirestore(current);
-    toast("PIN actualizado correctamente");
-  } catch (error) {
-    toast("Error al actualizar el PIN");
+    toast('PIN actualizado');
+  } else if (newPin !== null) {
+    toast('El PIN debe tener 4 números');
   }
 }
 </script>
