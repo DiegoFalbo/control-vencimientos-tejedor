@@ -1,342 +1,424 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Vencimientos - YPF Tejedor</title>
-  <!-- Estilos y librerías base -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --border-color: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; min-height: 100vh; display: flex; flex-direction: column; }
-    .container { max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
-    h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
-    .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .btn { background-color: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    .btn:hover { background-color: var(--accent-hover); }
-    .btn-secondary { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
-    .btn-secondary:hover { background-color: rgba(255,255,255,0.05); }
-    .hidden { display: none !important; }
-    .form-group { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: var(--text-muted); }
-    input, select { width: 100%; padding: 10px 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-size: 1rem; }
-    input:focus, select:focus { outline: none; border-color: var(--accent); }
-    .check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; }
-    .check input { width: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
-    th { color: var(--text-muted); font-weight: 600; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    footer { text-align: center; padding: 20px 0; margin-top: 30px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Vencimientos - Estación de Servicio</title>
+    <!-- Tailwind CSS para diseño moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para íconos limpios (incluyendo PDF) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS para manejo de Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
 
-  <div class="container">
-    <header>
-      <h1>YPF Tejedor - Control de Vencimientos</h1>
-      <div id="userNavSection">
-        <button class="btn btn-secondary" onclick="openAccount()">Mi Cuenta</button>
-      </div>
+    <!-- HEADER / NAVEGACIÓN -->
+    <header class="bg-slate-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500 p-2 rounded-lg text-slate-900 font-bold">
+                    <i class="fa-solid fa-gas-pump text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">YPF - Control de Vencimientos</h1>
+                    <p class="text-xs text-slate-400">Gestión Operativa Profesional</p>
+                </div>
+            </div>
+            
+            <!-- Selector de Usuario / Rol activo -->
+            <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+                <div class="text-right">
+                    <span id="userDisplayName" class="block text-sm font-semibold text-amber-400">Diego</span>
+                    <span id="userRoleBadge" class="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider bg-amber-500 text-slate-900 font-bold rounded">Master</span>
+                </div>
+                <select id="userSelector" onchange="cambiarUsuario(this.value)" class="bg-slate-800 text-xs border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none">
+                    <option value="Diego" selected>Diego (Master)</option>
+                    <option value="Lucas">Lucas (Supervisor)</option>
+                    <option value="Marcos">Marcos (Encargado)</option>
+                </select>
+            </div>
+        </div>
     </header>
 
-    <!-- Vista de Usuarios / Panel Principal -->
-    <div id="usersView" class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h2>Gestión de Usuarios</h2>
-        <button class="btn" onclick="openUser()">+ Nuevo Usuario</button>
-      </div>
-      <div id="usersTableContainer">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Rol</th>
-              <th>Sectores</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <!-- Dinámico -->
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-    <!-- Formulario de Usuario -->
-    <div id="userFormView" class="card hidden">
-      <h2 id="userTitle" style="margin-bottom: 16px;">Crear usuario</h2>
-      <form id="userForm">
-        <input type="hidden" id="userEditId">
-        <div class="form-group">
-          <label>Nombre y Apellido</label>
-          <input type="text" id="userName" required placeholder="Ej: JUAN PEREZ">
+        <!-- PANEL DE MÉTRICAS (Rangos actualizados: 0-30 y 31-45) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500 flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase font-semibold">Críticos (0 - 30 días)</p>
+                    <h2 id="countCriticos" class="text-2xl font-bold text-red-600">0</h2>
+                </div>
+                <div class="bg-red-50 text-red-500 p-3 rounded-full"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500 flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase font-semibold">Próximos (31 - 45 días)</p>
+                    <h2 id="countProximos" class="text-2xl font-bold text-amber-600">0</h2>
+                </div>
+                <div class="bg-amber-50 text-amber-500 p-3 rounded-full"><i class="fa-solid fa-clock text-lg"></i></div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500 flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-slate-500 uppercase font-semibold">Estables (> 45 días)</p>
+                    <h2 id="countEstables" class="text-2xl font-bold text-emerald-600">0</h2>
+                </div>
+                <div class="bg-emerald-50 text-emerald-500 p-3 rounded-full"><i class="fa-solid fa-check-circle text-lg"></i></div>
+            </div>
         </div>
-        <div class="form-group">
-          <label>Rol</label>
-          <select id="userRole" onchange="toggleSectorAssignment()">
-            <option value="encargado">Encargado</option>
-            <option value="responsable">Responsable</option>
-            <option value="admin">Administrador</option>
-          </select>
+
+        <!-- ACCIONES Y PANELES SEGÚN ROL -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Columna Izquierda: Formulario de Carga y Gestión de Catálogo Excel (Solo Master/Diego) -->
+            <div id="masterPanelContainer" class="bg-white p-5 rounded-xl shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b pb-3">
+                    <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-file-excel text-emerald-600"></i> Catálogo SKUs (Excel)</h3>
+                    <span class="text-[10px] bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded">Exclusivo Master</span>
+                </div>
+                <p class="text-xs text-slate-500">Subí tu listado actualizado. Actualiza descripciones y nuevos SKUs preservando los vencimientos activos.</p>
+                
+                <div class="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center hover:bg-slate-50 transition cursor-pointer relative">
+                    <input type="file" id="excelMasterInput" accept=".xlsx, .xls, .csv" onchange="importarExcelMaster(event)" class="absolute inset-0 opacity-0 cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
+                    <p class="text-xs font-medium text-slate-600">Hacé clic o arrastrá tu Excel aquí</p>
+                    <p class="text-[10px] text-slate-400">Columnas requeridas: SKU, Descripcion</p>
+                </div>
+
+                <hr class="my-4">
+
+                <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i class="fa-solid fa-plus-circle text-blue-600"></i> Registrar Vencimiento Manual</h3>
+                <form id="formVencimiento" onsubmit="agregarVencimiento(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">SKU o Producto</label>
+                        <select id="selectSku" class="w-full text-xs border border-slate-300 rounded p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" required>
+                            <option value="">Seleccionar SKU...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Fecha de Vencimiento</label>
+                        <input type="date" id="inputFecha" class="w-full text-xs border border-slate-300 rounded p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Lote / Ubicación (Opcional)</label>
+                        <input type="text" id="inputLote" placeholder="Ej: Góndola Central / Lote 45" class="w-full text-xs border border-slate-300 rounded p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 rounded transition">Guardar Vencimiento</button>
+                </form>
+            </div>
+
+            <!-- Columna Derecha / Principal: Listado de Vencimientos & Historial de Gestión -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Tabla de Vencimientos -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-4 border-b flex flex-wrap justify-between items-center gap-3">
+                        <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-amber-600"></i> Control de Stock Vigente</h3>
+                        
+                        <!-- Filtros y Botón PDF Minimalista (Solo ícono) -->
+                        <div class="flex items-center space-x-2">
+                            <select id="filtroEstado" onchange="renderizarTablas()" class="text-xs border border-slate-300 rounded px-2 py-1.5 focus:outline-none">
+                                <option value="todos">Todos los estados</option>
+                                <option value="critico">Críticos (0-30d)</option>
+                                <option value="proximo">Próximos (31-45d)</option>
+                                <option value="estable">Estables (>45d)</option>
+                            </select>
+                            <button onclick="exportarPDF()" title="Exportar a PDF" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 p-2 rounded transition flex items-center justify-center">
+                                <i class="fa-solid fa-file-pdf text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto max-h-80">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 sticky top-0 border-b">
+                                <tr>
+                                    <th class="p-3">SKU / Descripción</th>
+                                    <th class="p-3">Vencimiento</th>
+                                    <th class="p-3">Días Restantes</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaVencimientosBody" class="divide-y divide-slate-100 text-xs">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Historial de Actividad de Gestión (Excluye altas, visible para encargados, supervisores y master) -->
+                <div class="bg-white p-5 rounded-xl shadow-sm space-y-3">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-slate-600"></i> Historial de Gestión de Vencimientos</h3>
+                        <span class="text-[10px] text-slate-400">Modificaciones y Eliminaciones operativas</span>
+                    </div>
+                    <div class="max-h-48 overflow-y-auto space-y-2" id="historialGestionContainer">
+                        <p class="text-xs text-slate-400 italic text-center py-4">No hay registros de gestión recientes.</p>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-        <div class="form-group" id="sectorAssignment">
-          <label>Sectores asignados (Críticos: 0-30 días | Próximos: 31-45 días)</label>
-          <div id="sectorChecks" style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
-            <!-- Generado por JS -->
-          </div>
-        </div>
-        <div class="form-group">
-          <label>PIN de Acceso (4 dígitos)</label>
-          <input type="text" id="userPin" maxlength="4" required value="2039">
-        </div>
-        <div class="form-group">
-          <label>Estado</label>
-          <select id="userActive">
-            <option value="true">Activo</option>
-            <option value="false">Inactivo</option>
-          </select>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button type="submit" class="btn">Guardar</button>
-          <button type="button" class="btn btn-secondary" onclick="show('usersView')">Cancelar</button>
-        </div>
-      </form>
-    </div>
 
-    <!-- Vista de Cuenta Personal -->
-    <div id="account" class="card hidden">
-      <h2>Mi Cuenta</h2>
-      <div style="display: flex; align-items: center; gap: 16px; margin: 20px 0;">
-        <div id="profileAvatar" style="width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">U</div>
-        <div>
-          <h3 id="profileName">-</h3>
-          <p id="profileRole" style="color: var(--text-muted);">-</p>
-          <p id="profileSectors" style="font-size: 0.9rem; margin-top: 4px; color: var(--warning);"></p>
-        </div>
-      </div>
-      <div style="display: flex; gap: 10px;">
-        <button class="btn" onclick="changeOwnPin()">Cambiar PIN</button>
-        <button class="btn btn-secondary" onclick="show('usersView')">Volver</button>
-      </div>
-    </div>
-  </div>
+    </main>
 
-  <div id="toastContainer"></div>
+    <!-- SCRIPT DE FUNCIONAMIENTO -->
+    <script>
+        // ESTADOS Y DATOS INICIALES DE PRUEBA
+        let usuarioActual = { nombre: "Diego", rol: "Master" }; // Roles: Master, Supervisor, Encargado
 
-  <footer>
-    Desarrollado por <strong>Diego Falbo</strong> &amp; <span style="color: #60a5fa; font-weight: 600;">Gemini</span> ⚡
-  </footer>
+        let catalogoSKUs = [
+            { sku: "YPF-001", descripcion: "Lubricante YPF Extra Live 10W40 1L" },
+            { sku: "YPF-002", descripcion: "Aditivo Diesel Clean 500cc" },
+            { sku: "YPF-003", descripcion: "Agua Desmineralizada Full 5L" },
+            { sku: "YPF-004", descripcion: "Refrigerante Anticongelante 1L" },
+            { sku: "YPF-005", descripcion: "Snack Maní Salado Full 100g" }
+        ];
 
-  <script>
-    const SK = 'ypf_tejedor_session';
-    const SECTORS = ['Playas', 'Full', 'Boxes', 'Lubricantes'];
-    let users = [];
-    let current = null;
+        let vencimientos = [
+            { id: 1, sku: "YPF-001", descripcion: "Lubricante YPF Extra Live 10W40 1L", fecha: "2026-10-10", lote: "Góndola A" },
+            { id: 2, sku: "YPF-003", descripcion: "Agua Desmineralizada Full 5L", fecha: "2026-10-28", lote: "Depósito 1" },
+            { id: 3, sku: "YPF-005", descripcion: "Snack Maní Salado Full 100g", fecha: "2026-11-05", lote: "Heladera Full" }
+        ];
 
-    function $(id) { return document.getElementById(id); }
+        let historialActividad = [];
 
-    function show(viewId) {
-      ['usersView', 'userFormView', 'account'].forEach(id => {
-        const el = $(id);
-        if (el) el.classList.add('hidden');
-      });
-      const target = $(viewId);
-      if (target) target.classList.remove('hidden');
-    }
+        // CAMBIO DE USUARIO (Simulación de perfiles)
+        function cambiarUsuario(nombre) {
+            if (nombre === "Diego") {
+                usuarioActual = { nombre: "Diego", rol: "Master" };
+            } else if (nombre === "Lucas") {
+                usuarioActual = { nombre: "Lucas", rol: "Supervisor" };
+            } else {
+                usuarioActual = { nombre: "Marcos", rol: "Encargado" };
+            }
 
-    function toast(msg) {
-      const c = $('toastContainer');
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
-      c.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
+            document.getElementById("userDisplayName").innerText = usuarioActual.nombre;
+            const badge = document.getElementById("userRoleBadge");
+            badge.innerText = usuarioActual.rol;
 
-    function roleLabel(role) {
-      if (role === 'admin') return 'Administrador';
-      if (role === 'responsable') return 'Responsable de Sector';
-      return 'Encargado';
-    }
-
-    function esc(str) {
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    // Lógica de cálculo de vencimientos (Críticos: 0 a 30 días | Próximos: 31 a 45 días)
-    function getExpirationCategory(daysLeft) {
-      if (daysLeft <= 30) return 'critico'; // 0 a 30 días (y vencidos)
-      if (daysLeft <= 45) return 'proximo'; // 31 a 45 días
-      return 'normal';
-    }
-
-    async function toggleUserActive(id) {
-      const u = users.find(x => x.id === id);
-      if (!u) return;
-      u.active = !u.active;
-      await saveUserToFirestore(u);
-      toast(`Usuario ${u.active ? 'activado' : 'desactivado'}`);
-      renderUsersTable();
-    }
-
-    function openUser(id = null) {
-      $('userEditId').value = '';
-      $('userName').value = '';
-      $('userRole').value = 'encargado';
-      $('userPin').value = '2039';
-      $('userActive').value = 'true';
-      buildSectorChecks([]);
-
-      if (id) {
-        const u = users.find(x => x.id === id);
-        if (u) {
-          $('userEditId').value = u.id;
-          $('userName').value = u.name;
-          $('userRole').value = u.role;
-          $('userPin').value = u.pin;
-          $('userActive').value = String(u.active);
-          buildSectorChecks(u.sectors || []);
+            // Restringir panel de carga de catálogo Excel solo a Master
+            const masterPanel = document.getElementById("masterPanelContainer");
+            if (usuarioActual.rol === "Master") {
+                masterPanel.style.display = "block";
+            } else {
+                masterPanel.style.display = "none";
+            }
+            renderizarTablas();
         }
-        $('userTitle').textContent = 'Editar usuario';
-      } else {
-        $('userTitle').textContent = 'Crear usuario';
-      }
-      toggleSectorAssignment();
-      show('userFormView');
-    }
 
-    function buildSectorChecks(selectedSectors = []) {
-      const container = $('sectorChecks');
-      if (!container) return;
-      container.innerHTML = SECTORS.map(s => `
-        <label class="check">
-          <input type="checkbox" name="userSector" value="${esc(s)}" ${selectedSectors.includes(s) ? 'checked' : ''}>
-          ${esc(s)}
-        </label>
-      `).join('');
-    }
+        // CARGA INTELIGENTE DE EXCEL PARA SKUS (Fusiona sin borrar vencimientos existentes)
+        function importarExcelMaster(event) {
+            if (usuarioActual.rol !== "Master") {
+                alert("Acceso denegado. Solo el rol Master puede actualizar el catálogo de SKUs.");
+                return;
+            }
 
-    function toggleSectorAssignment() {
-      const role = $('userRole').value;
-      const assignmentDiv = $('sectorAssignment');
-      if (assignmentDiv) {
-        if (role === 'responsable') {
-          assignmentDiv.classList.remove('hidden');
-        } else {
-          assignmentDiv.classList.add('hidden');
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet);
+
+                    let importados = 0;
+                    rows.forEach(row => {
+                        const sku = row.SKU || row.sku || row.Codigo;
+                        const desc = row.Descripcion || row.descripcion || row.NOMBRE;
+
+                        if (sku && desc) {
+                            const existente = catalogoSKUs.find(item => item.sku.toString().trim() === sku.toString().trim());
+                            if (existente) {
+                                existente.descripcion = desc.toString().trim(); // Actualiza descripción
+                            } else {
+                                catalogoSKUs.push({ sku: sku.toString().trim(), descripcion: desc.toString().trim() });
+                            }
+                            importados++;
+                        }
+                    });
+
+                    alert(`¡Catálogo actualizado correctamente! Se procesaron ${importados} productos. Los vencimientos activos se conservaron intactos.`);
+                    poblarSelectSKUs();
+                    renderizarTablas();
+                } catch (error) {
+                    alert("Error al procesar el archivo Excel. Verificá el formato de las columnas.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
-      }
-    }
 
-    document.getElementById('userForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = $('userEditId').value;
-      const name = $('userName').value.trim().toUpperCase();
-      const role = $('userRole').value;
-      const pin = $('userPin').value.trim();
-      const active = $('userActive').value === 'true';
+        // POBLAR SELECT DE SKUS
+        function poblarSelectSKUs() {
+            const select = document.getElementById("selectSku");
+            select.innerHTML = '<option value="">Seleccionar SKU...</option>';
+            catalogoSKUs.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.sku;
+                opt.textContent = `${item.sku} - ${item.descripcion}`;
+                select.appendChild(opt);
+            });
+        }
 
-      const sectors = [];
-      if (role === 'responsable') {
-        document.querySelectorAll('input[name="userSector"]:checked').forEach(cb => {
-          sectors.push(cb.value);
-        });
-      }
+        // AGREGAR VENCIMIENTO
+        function agregarVencimiento(e) {
+            e.preventDefault();
+            const skuVal = document.getElementById("selectSku").value;
+            const fechaVal = document.getElementById("inputFecha").value;
+            const loteVal = document.getElementById("inputLote").value || "General";
 
-      if (!name || !pin) {
-        toast('Completá los campos obligatorios');
-        return;
-      }
+            const prod = catalogoSKUs.find(i => i.sku === skuVal);
+            if (!prod) return;
 
-      const userId = id || name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      const userData = { id: userId, name, role, pin, active, sectors };
+            const nuevo = {
+                id: Date.now(),
+                sku: prod.sku,
+                descripcion: prod.descripcion,
+                fecha: fechaVal,
+                lote: loteVal
+            };
 
-      try {
-        await saveUserToFirestore(userData);
-        toast('Usuario guardado con éxito');
-        show('usersView');
-        renderUsersTable();
-      } catch (error) {
-        console.error("Error al guardar usuario:", error);
-        toast('Error: ' + error.message);
-      }
-    });
+            vencimientos.push(nuevo);
+            document.getElementById("formVencimiento").reset();
+            renderizarTablas();
+        }
 
-    function openAccount() {
-      if (!current) return;
-      $('profileAvatar').textContent = current.name.charAt(0).toUpperCase();
-      $('profileName').textContent = current.name;
-      $('profileRole').textContent = roleLabel(current.role);
-      $('profileSectors').textContent = current.sectors && current.sectors.length ? `Sectores: ${current.sectors.join(', ')}` : '';
-      show('account');
-    }
+        // CALCULAR DÍAS RESTANTES Y ESTADO (Rangos: 0-30 Crítico, 31-45 Próximo, >45 Estable)
+        function calcularEstado(fechaStr) {
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            const venc = new Date(fechaStr + "T00:00:00");
+            const diffTime = venc - hoy;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    async function changeOwnPin() {
-      const newPin = prompt("Ingresá tu nuevo PIN (4 números):");
-      if (!newPin) return;
-      if (newPin.length !== 4 || isNaN(newPin)) {
-        toast("El PIN debe tener exactamente 4 números");
-        return;
-      }
-      current.pin = newPin;
-      try {
-        await saveUserToFirestore(current);
-        toast("PIN actualizado correctamente");
-      } catch (error) {
-        toast("Error al actualizar el PIN");
-      }
-    }
+            let estado = "";
+            let claseBadge = "";
+            let textoEstado = "";
 
-    function renderUsersTable() {
-      const tbody = $('usersTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = users.map(u => `
-        <tr>
-          <td><strong>${esc(u.name)}</strong></td>
-          <td>${roleLabel(u.role)}</td>
-          <td>${u.sectors && u.sectors.length ? u.sectors.join(', ') : '-'}</td>
-          <td><span style="color: ${u.active ? 'var(--success)' : 'var(--danger)'};">${u.active ? 'Activo' : 'Inactivo'}</span></td>
-          <td>
-            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85rem;" onclick="openUser('${u.id}')">Editar</button>
-            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85rem;" onclick="toggleUserActive('${u.id}')">${u.active ? 'Desactivar' : 'Activar'}</button>
-          </td>
-        </tr>
-      `).join('');
-    }
+            if (diffDays <= 30) {
+                estado = "critico";
+                claseBadge = "bg-red-100 text-red-700 border border-red-200";
+                textoEstado = "Crítico (0-30d)";
+            } else if (diffDays <= 45) {
+                estado = "proximo";
+                claseBadge = "bg-amber-100 text-amber-700 border border-amber-200";
+                textoEstado = "Próximo (31-45d)";
+            } else {
+                estado = "estable";
+                claseBadge = "bg-emerald-100 text-emerald-700 border border-emerald-200";
+                textoEstado = "Estable (>45d)";
+            }
 
-    // Mock save function placeholder to integrate with your existing Firestore implementation
-    async function saveUserToFirestore(userData) {
-      const idx = users.findIndex(x => x.id === userData.id);
-      if (idx >= 0) users[idx] = userData;
-      else users.push(userData);
-    }
+            return { diffDays, estado, claseBadge, textoEstado };
+        }
 
-    // Inicialización de prueba local o carga con Firebase
-    window.addEventListener('load', () => {
-      // Datos de ejemplo para prueba visual inicial si no hay datos cargados
-      users = [
-        { id: 'diego', name: 'DIEGO FALBO', role: 'admin', pin: '2039', active: true, sectors: [] },
-        { id: 'marcos', name: 'MARCOS', role: 'responsable', pin: '1234', active: true, sectors: ['Full', 'Boxes'] }
-      ];
-      current = users[0];
-      renderUsersTable();
-    });
-  </script>
+        // ELIMINAR O EDITAR (REGISTRA EN HISTORIAL DE GESTIÓN - EXCLUYE ALTAS)
+        function eliminarVencimiento(id) {
+            const item = vencimientos.find(v => v.id === id);
+            if (!item) return;
+
+            if (confirm(`¿Confirmás la baja/eliminación del producto ${item.descripcion} (${item.sku})?`)) {
+                vencimientos = vencimientos.filter(v => v.id !== id);
+
+                // Registrar en Historial de Gestión
+                historialActividad.unshift({
+                    accion: "Eliminación / Baja",
+                    detalle: `Producto: ${item.descripcion} (Vto: ${item.fecha})`,
+                    usuario: usuarioActual.nombre,
+                    rol: usuarioActual.rol,
+                    fechaHora: new Date().toLocaleString()
+                });
+
+                renderizarTablas();
+            }
+        }
+
+        // RENDERIZAR TABLAS Y MÉTRICAS
+        function renderizarTablas() {
+            const filtro = document.getElementById("filtroEstado").value;
+            const tbody = document.getElementById("tablaVencimientosBody");
+            tbody.innerHTML = "";
+
+            let countC = 0;
+            let countP = 0;
+            let countE = 0;
+
+            vencimientos.forEach(item => {
+                const info = calcularEstado(item.fecha);
+
+                if (info.estado === "critico") countC++;
+                if (info.estado === "proximo") countP++;
+                if (info.estado === "estable") countE++;
+
+                if (filtro !== "todos" && filtro !== info.estado) return;
+
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-50";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <span class="font-bold text-slate-700 block">${item.sku}</span>
+                        <span class="text-slate-500 text-[11px]">${item.descripcion}</span>
+                    </td>
+                    <td class="p-3 font-medium">${item.fecha}</td>
+                    <td class="p-3 font-semibold ${info.diffDays <= 30 ? 'text-red-600' : (info.diffDays <= 45 ? 'text-amber-600' : 'text-emerald-600')}">${info.diffDays} días</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${info.claseBadge}">${info.textoEstado}</span></td>
+                    <td class="p-3 text-center">
+                        <button onclick="eliminarVencimiento(${item.id})" class="text-slate-400 hover:text-red-600 transition p-1" title="Eliminar registro"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (tbody.innerHTML === "") {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">No se encontraron registros para este filtro.</td></tr>`;
+            }
+
+            // Actualizar contadores métricos
+            document.getElementById("countCriticos").innerText = countC;
+            document.getElementById("countProximos").innerText = countP;
+            document.getElementById("countEstables").innerText = countE;
+
+            // Renderizar Historial de Gestión
+            renderizarHistorial();
+        }
+
+        function renderizarHistorial() {
+            const container = document.getElementById("historialGestionContainer");
+            if (historialActividad.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-2">No hay registros de gestión recientes.</p>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            historialActividad.forEach(h => {
+                const div = document.createElement("div");
+                div.className = "bg-slate-50 p-2.5 rounded border border-slate-100 text-xs flex justify-between items-center";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-700">${h.accion}</span> - <span class="text-slate-600">${h.detalle}</span>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Por: ${h.usuario} (${h.rol})</div>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400">${h.fechaHora}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // EXPORTAR A PDF (Uso de impresión limpia con formato de documento)
+        function exportarPDF() {
+            window.print();
+        }
+
+        // Inicializar
+        poblarSelectSKUs();
+        renderizarTablas();
+    </script>
 </body>
 </html>
