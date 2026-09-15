@@ -44,7 +44,7 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-        <!-- PANEL DE MÉTRICAS (Rangos: 0-30 y 31-45 días) -->
+        <!-- PANEL DE MÉTRICAS (Rangos actualizados: 0-30 y 31-45) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500 flex justify-between items-center">
                 <div>
@@ -72,19 +72,19 @@
         <!-- ACCIONES Y PANELES SEGÚN ROL -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Columna Izquierda: Carga Excel Catálogo (Col A SKU, Col B Desc) y Carga Manual -->
+            <!-- Columna Izquierda: Formulario de Carga y Gestión de Catálogo Excel (Solo Master/Diego) -->
             <div id="masterPanelContainer" class="bg-white p-5 rounded-xl shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b pb-3">
                     <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-file-excel text-emerald-600"></i> Catálogo SKUs (Excel)</h3>
                     <span class="text-[10px] bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded">Exclusivo Master</span>
                 </div>
-                <p class="text-xs text-slate-500">Subí tu listado. Toma automáticamente la <b>Columna A (SKU)</b> y <b>Columna B (Descripción)</b> sin borrar tus vencimientos actuales.</p>
+                <p class="text-xs text-slate-500">Subí tu listado actualizado. Actualiza descripciones y nuevos SKUs preservando los vencimientos activos.</p>
                 
                 <div class="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center hover:bg-slate-50 transition cursor-pointer relative">
                     <input type="file" id="excelMasterInput" accept=".xlsx, .xls, .csv" onchange="importarExcelMaster(event)" class="absolute inset-0 opacity-0 cursor-pointer">
                     <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
                     <p class="text-xs font-medium text-slate-600">Hacé clic o arrastrá tu Excel aquí</p>
-                    <p class="text-[10px] text-slate-400">Col. A: SKU | Col. B: Descripción</p>
+                    <p class="text-[10px] text-slate-400">Columnas requeridas: SKU, Descripcion</p>
                 </div>
 
                 <hr class="my-4">
@@ -109,7 +109,7 @@
                 </form>
             </div>
 
-            <!-- Columna Derecha: Listado de Vencimientos & Historial de Gestión -->
+            <!-- Columna Derecha / Principal: Listado de Vencimientos & Historial de Gestión -->
             <div class="lg:col-span-2 space-y-6">
                 
                 <!-- Tabla de Vencimientos -->
@@ -168,7 +168,8 @@
 
     <!-- SCRIPT DE FUNCIONAMIENTO -->
     <script>
-        let usuarioActual = { nombre: "Diego", rol: "Master" };
+        // ESTADOS Y DATOS INICIALES DE PRUEBA
+        let usuarioActual = { nombre: "Diego", rol: "Master" }; // Roles: Master, Supervisor, Encargado
 
         let catalogoSKUs = [
             { sku: "YPF-001", descripcion: "Lubricante YPF Extra Live 10W40 1L" },
@@ -186,7 +187,7 @@
 
         let historialActividad = [];
 
-        // CAMBIO DE USUARIO
+        // CAMBIO DE USUARIO (Simulación de perfiles)
         function cambiarUsuario(nombre) {
             if (nombre === "Diego") {
                 usuarioActual = { nombre: "Diego", rol: "Master" };
@@ -200,6 +201,7 @@
             const badge = document.getElementById("userRoleBadge");
             badge.innerText = usuarioActual.rol;
 
+            // Restringir panel de carga de catálogo Excel solo a Master
             const masterPanel = document.getElementById("masterPanelContainer");
             if (usuarioActual.rol === "Master") {
                 masterPanel.style.display = "block";
@@ -209,7 +211,7 @@
             renderizarTablas();
         }
 
-        // CARGA INTELIGENTE DE EXCEL (Columna A: SKU, Columna B: Descripción)
+        // CARGA INTELIGENTE DE EXCEL PARA SKUS (Fusiona sin borrar vencimientos existentes)
         function importarExcelMaster(event) {
             if (usuarioActual.rol !== "Master") {
                 alert("Acceso denegado. Solo el rol Master puede actualizar el catálogo de SKUs.");
@@ -225,47 +227,29 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    
-                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    const rows = XLSX.utils.sheet_to_json(firstSheet);
 
                     let importados = 0;
-                    let startIndex = 0;
+                    rows.forEach(row => {
+                        const sku = row.SKU || row.sku || row.Codigo;
+                        const desc = row.Descripcion || row.descripcion || row.NOMBRE;
 
-                    if (rows.length > 0) {
-                        const colAHeader = String(rows[0][0] || '').toLowerCase();
-                        if (colAHeader.includes('sku') || colAHeader.includes('codigo') || colAHeader.includes('código')) {
-                            startIndex = 1;
-                        }
-                    }
-
-                    for (let i = startIndex; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (!row || row.length < 2) continue;
-
-                        const sku = row[0];  // Columna A: SKU
-                        const desc = row[1]; // Columna B: Descripción
-
-                        if (sku !== undefined && sku !== null && desc !== undefined && desc !== null) {
-                            const skuStr = sku.toString().trim();
-                            const descStr = desc.toString().trim();
-
-                            if (skuStr !== "" && descStr !== "") {
-                                const existente = catalogoSKUs.find(item => item.sku === skuStr);
-                                if (existente) {
-                                    existente.descripcion = descStr;
-                                } else {
-                                    catalogoSKUs.push({ sku: skuStr, descripcion: descStr });
-                                }
-                                importados++;
+                        if (sku && desc) {
+                            const existente = catalogoSKUs.find(item => item.sku.toString().trim() === sku.toString().trim());
+                            if (existente) {
+                                existente.descripcion = desc.toString().trim(); // Actualiza descripción
+                            } else {
+                                catalogoSKUs.push({ sku: sku.toString().trim(), descripcion: desc.toString().trim() });
                             }
+                            importados++;
                         }
-                    }
+                    });
 
-                    alert(`¡Catálogo actualizado correctamente! Se procesaron ${importados} productos desde las columnas A y B. Los vencimientos activos se conservaron intactos.`);
+                    alert(`¡Catálogo actualizado correctamente! Se procesaron ${importados} productos. Los vencimientos activos se conservaron intactos.`);
                     poblarSelectSKUs();
                     renderizarTablas();
                 } catch (error) {
-                    alert("Error al procesar el archivo Excel. Verificá que el archivo tenga formato válido.");
+                    alert("Error al procesar el archivo Excel. Verificá el formato de las columnas.");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -306,7 +290,7 @@
             renderizarTablas();
         }
 
-        // CALCULAR DÍAS RESTANTES Y ESTADO (0-30 Crítico, 31-45 Próximo, >45 Estable)
+        // CALCULAR DÍAS RESTANTES Y ESTADO (Rangos: 0-30 Crítico, 31-45 Próximo, >45 Estable)
         function calcularEstado(fechaStr) {
             const hoy = new Date();
             hoy.setHours(0,0,0,0);
@@ -335,7 +319,7 @@
             return { diffDays, estado, claseBadge, textoEstado };
         }
 
-        // ELIMINAR REGISTRO (REGISTRA EN HISTORIAL DE GESTIÓN - EXCLUYE ALTAS)
+        // ELIMINAR O EDITAR (REGISTRA EN HISTORIAL DE GESTIÓN - EXCLUYE ALTAS)
         function eliminarVencimiento(id) {
             const item = vencimientos.find(v => v.id === id);
             if (!item) return;
@@ -343,6 +327,7 @@
             if (confirm(`¿Confirmás la baja/eliminación del producto ${item.descripcion} (${item.sku})?`)) {
                 vencimientos = vencimientos.filter(v => v.id !== id);
 
+                // Registrar en Historial de Gestión
                 historialActividad.unshift({
                     accion: "Eliminación / Baja",
                     detalle: `Producto: ${item.descripcion} (Vto: ${item.fecha})`,
@@ -395,10 +380,12 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">No se encontraron registros para este filtro.</td></tr>`;
             }
 
+            // Actualizar contadores métricos
             document.getElementById("countCriticos").innerText = countC;
             document.getElementById("countProximos").innerText = countP;
             document.getElementById("countEstables").innerText = countE;
 
+            // Renderizar Historial de Gestión
             renderizarHistorial();
         }
 
@@ -424,7 +411,7 @@
             });
         }
 
-        // EXPORTAR A PDF
+        // EXPORTAR A PDF (Uso de impresión limpia con formato de documento)
         function exportarPDF() {
             window.print();
         }
