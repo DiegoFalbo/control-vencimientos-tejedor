@@ -24,7 +24,7 @@
 main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.view{display:none}.view.active{display:block}.welcome{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}.welcome h2{margin:0;font-size:clamp(24px,5vw,36px)}.welcome p{margin:5px 0 0;color:var(--muted)}.sync{font-size:12px;color:var(--muted)}
 .actions{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.action{border:0;border-radius:20px;min-height:145px;padding:21px;color:#fff;text-align:left;box-shadow:var(--shadow)}.action.blue{background:linear-gradient(135deg,#0d63c7,#1593e7)}.action.red{background:linear-gradient(135deg,#a91e22,#e44638)}.action.purple{background:linear-gradient(135deg,#4c2d97,#8256d5)}.action.green{background:linear-gradient(135deg,#125e36,#1a8f4f)}.action span{display:block;font-size:30px;margin-bottom:13px}.action strong{font-size:17px}.action small{display:block;opacity:.85;margin-top:7px;line-height:1.4}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.metric{background:#fff;border-radius:17px;padding:16px;border-left:5px solid #98a2b3;box-shadow:var(--shadow)}.metric.red{border-color:var(--red)}.metric.orange{border-color:var(--orange)}.metric.yellow{border-color:#e0a800}.metric.green{border-color:var(--green)}.metric b{font-size:28px;display:block}.metric small{color:var(--muted)}
-.card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.small{padding:7px 10px;font-size:11px}
+.card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:19px;margin-bottom:16px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.head h2{margin:0;font-size:23px}.back{border:0;padding:9px 12px;border-radius:10px;background:#e8eef6;color:#17375e;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.full{grid-column:1/-1}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.btn.primary{background:var(--blue);color:#fff}.btn.secondary{background:#e8eef6;color:#17375e}.btn.danger{background:#fde6e6;color:#a51b1b}.btn.purple{background:var(--purple);color:#fff}.btn.orange{background:#fff3e0;color:#b25900;border:1px solid #ffe0b2}.btn.small{padding:7px 10px;font-size:11px}
 .btn-pdf{background:#ffebee;color:#c62828;border:1px solid #ffcdd2;border-radius:10px;padding:8px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:12px;}
 .sector-banner{background:#e9f4ff;border:1px solid #aed2f5;color:#124f84;border-radius:13px;padding:12px 14px;margin-bottom:14px;font-weight:800}
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:13px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:15px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px}.item h3{margin:0 0 7px;font-size:17px}.meta{display:flex;flex-wrap:wrap;gap:6px 13px;color:var(--muted);font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900;white-space:nowrap}.badge.vencido{background:#fde0e0;color:#a51b1b}.badge.critico{background:#ffe5d2;color:#ae4900}.badge.proximo{background:#fff1c0;color:#775600}.badge-sku{background:#e2e8f0;color:#334155;padding:2px 7px;border-radius:6px;font-weight:800;font-size:11px}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.empty{text-align:center;color:var(--muted);padding:35px}.notice{background:#eef6ff;border:1px solid #bfd8f5;color:#164f82;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}.warning{background:#fff5ce;border:1px solid #f0d46d;color:#6e5600;border-radius:13px;padding:11px;font-size:12px;margin-bottom:14px}
@@ -88,7 +88,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
       <div class="actions">
         <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
         <button class="action red" onclick="show('critical')"><span>!</span><strong>Ver críticos</strong><small>Vencidos y productos que vencen dentro de 30 días.</small></button>
-        <button class="action green" onclick="show('history')"><span>📋</span><strong>Historial de gestión</strong><small>Modificaciones, eliminaciones y cambios operativos.</small></button>
+        <button class="action green" onclick="show('history')"><span>📋</span><strong>Historial de gestión</strong><small>Modificaciones, eliminaciones, retiros y cambios operativos.</small></button>
         <button id="adminButton" class="action purple" onclick="show('users')"><span>⚙</span><strong>Administrar usuarios</strong><small>Crear, modificar, asignar roles y restablecer PIN.</small></button>
       </div>
       <div class="metrics">
@@ -181,7 +181,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
         <h2>Historial de actividad de gestión</h2>
         <button class="back" onclick="show('home')">← Volver</button>
       </div>
-      <div class="notice">Registra modificaciones, eliminaciones y cambios operativos (excluyendo altas de productos). Accesible para encargados, supervisores y Master.</div>
+      <div class="notice">Registra modificaciones, eliminaciones, retiros de stock y cambios operativos. Accesible para encargados, supervisores y Master.</div>
       <div class="card">
         <div id="activityList" class="list"></div>
       </div>
@@ -343,6 +343,9 @@ function initFirebaseSync() {
     snapshot.forEach(doc => {
       products.push({ id: doc.id, ...doc.data() });
     });
+    // Ordenar automáticamente por fecha de vencimiento más cercana
+    products.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+
     if(typeof renderMetrics === 'function') renderMetrics();
     if(typeof renderProducts === 'function') renderProducts();
   });
@@ -574,15 +577,7 @@ function login() {
   $('loginPin').value = '';
   $('loginUser').value = '';
   setupInterface();
-  
-  // NUEVO: Lógica de redirección desde QR
-  if (pendingRoute.view === 'product' && pendingRoute.sector) {
-      openProduct(pendingRoute.sector);
-      pendingRoute = { view: 'home', sector: '' }; // Limpiamos la ruta
-  } else {
-      show('home');
-  }
-  
+  show('home');
   toast(`¡Bienvenido, ${user.name}!`);
 }
 
@@ -661,14 +656,6 @@ function onSkuInput(){
 
 window.addEventListener('DOMContentLoaded', ()=>{
   initFirebaseSync();
-  
-  // NUEVO: Leer si la URL trae un sector desde el QR
-  const params = new URLSearchParams(window.location.search);
-  const sectorFromUrl = params.get('sector');
-  if (sectorFromUrl) {
-      pendingRoute = { view: 'product', sector: decodeURIComponent(sectorFromUrl).toUpperCase() };
-  }
-
   const skuInput = $('sku');
   if(skuInput){
     skuInput.addEventListener('keydown', (e)=>{
@@ -800,9 +787,6 @@ function renderProducts(){
     return matchesSearch && matchesSector && matchesState;
   });
 
-  // NUEVO: Ordenar por fecha de vencimiento (los más urgentes primero)
-  filtered.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
-
   if(filtered.length === 0){
     container.innerHTML = '<div class="empty">No hay registros que coincidan con los filtros.</div>';
     return;
@@ -831,6 +815,7 @@ function renderProducts(){
         <div style="text-align:right">
           <span class="badge ${badgeClass}">${badgeText}</span>
           <div class="item-actions">
+            <button class="btn orange small" onclick="withdrawProduct('${item.id}')">Retirar</button>
             <button class="btn secondary small" onclick="editProduct('${item.id}')">Editar</button>
             <button class="btn danger small" onclick="removeProduct('${item.id}', '${esc(item.description)}')">Eliminar</button>
           </div>
@@ -838,6 +823,48 @@ function renderProducts(){
       </div>
     `;
   }).join('');
+}
+
+// ==========================================
+// FUNCIÓN DE RETIRO DE STOCK
+// ==========================================
+async function withdrawProduct(id) {
+  const item = products.find(x => x.id === id);
+  if(!item) return;
+
+  const inputQty = prompt(`Cantidad actual disponible: ${item.quantity}\nIngresá la cantidad a retirar:`, item.quantity);
+  if(inputQty === null) return;
+
+  const qtyToWithdraw = parseInt(inputQty);
+  if(isNaN(qtyToWithdraw) || qtyToWithdraw <= 0) {
+    toast('Ingresá una cantidad válida');
+    return;
+  }
+
+  if(qtyToWithdraw > item.quantity) {
+    toast('No podés retirar más cantidad de la que hay en stock');
+    return;
+  }
+
+  const remaining = item.quantity - qtyToWithdraw;
+
+  try {
+    if(remaining === 0) {
+      await db.collection('products').doc(id).delete();
+      await logActivity('RETIRO', `Retiro total y baja de "${item.description}" (${qtyToWithdraw} unidades)`);
+      toast('Retiro total: producto dado de baja');
+    } else {
+      item.quantity = remaining;
+      item.updatedAt = new Date().toISOString();
+      item.updatedBy = current ? current.name : 'Sistema';
+      await db.collection('products').doc(id).set(item);
+      await logActivity('RETIRO', `Retiro parcial de "${item.description}": ${qtyToWithdraw} unidades (Quedan ${remaining})`);
+      toast(`Retiro registrado con éxito. Stock restante: ${remaining}`);
+    }
+  } catch (error) {
+    console.error("Error al procesar retiro:", error);
+    toast('Error al registrar el retiro');
+  }
 }
 
 function renderActivityHistory() {
@@ -851,7 +878,7 @@ function renderActivityHistory() {
 
   container.innerHTML = activityLogs.map(log => {
     const dateFormatted = log.timestamp ? new Date(log.timestamp).toLocaleString('es-AR') : '';
-    const badgeColor = log.action === 'ELIMINACIÓN' ? 'vencido' : 'critico';
+    const badgeColor = log.action === 'ELIMINACIÓN' ? 'vencido' : log.action === 'RETIRO' ? 'orange' : 'critico';
     return `
       <div class="item">
         <div>
@@ -870,25 +897,11 @@ function renderActivityHistory() {
   }).join('');
 }
 
-// NUEVO: Función actualizada para recibir el sector pre-seleccionado
-function openProduct(preselectedSector = null) {
+function openProduct() {
   $('editId').value = '';
   $('productForm').reset();
   $('maestroNotice').classList.add('hidden');
   $('productTitle').textContent = 'Cargar vencimiento';
-  
-  const banner = $('sectorBanner');
-  if (banner) banner.classList.add('hidden');
-
-  if (preselectedSector && SECTORS.includes(preselectedSector)) {
-      $('sector').value = preselectedSector; 
-      
-      if (banner) {
-          banner.innerHTML = `📍 Escaneado desde QR - Cargando en: <strong>${preselectedSector}</strong>`;
-          banner.classList.remove('hidden');
-      }
-  }
-
   show('product');
 }
 
