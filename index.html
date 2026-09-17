@@ -574,7 +574,15 @@ function login() {
   $('loginPin').value = '';
   $('loginUser').value = '';
   setupInterface();
-  show('home');
+  
+  // NUEVO: Lógica de redirección desde QR
+  if (pendingRoute.view === 'product' && pendingRoute.sector) {
+      openProduct(pendingRoute.sector);
+      pendingRoute = { view: 'home', sector: '' }; // Limpiamos la ruta
+  } else {
+      show('home');
+  }
+  
   toast(`¡Bienvenido, ${user.name}!`);
 }
 
@@ -653,6 +661,14 @@ function onSkuInput(){
 
 window.addEventListener('DOMContentLoaded', ()=>{
   initFirebaseSync();
+  
+  // NUEVO: Leer si la URL trae un sector desde el QR
+  const params = new URLSearchParams(window.location.search);
+  const sectorFromUrl = params.get('sector');
+  if (sectorFromUrl) {
+      pendingRoute = { view: 'product', sector: decodeURIComponent(sectorFromUrl).toUpperCase() };
+  }
+
   const skuInput = $('sku');
   if(skuInput){
     skuInput.addEventListener('keydown', (e)=>{
@@ -784,6 +800,9 @@ function renderProducts(){
     return matchesSearch && matchesSector && matchesState;
   });
 
+  // NUEVO: Ordenar por fecha de vencimiento (los más urgentes primero)
+  filtered.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+
   if(filtered.length === 0){
     container.innerHTML = '<div class="empty">No hay registros que coincidan con los filtros.</div>';
     return;
@@ -851,11 +870,25 @@ function renderActivityHistory() {
   }).join('');
 }
 
-function openProduct() {
+// NUEVO: Función actualizada para recibir el sector pre-seleccionado
+function openProduct(preselectedSector = null) {
   $('editId').value = '';
   $('productForm').reset();
   $('maestroNotice').classList.add('hidden');
   $('productTitle').textContent = 'Cargar vencimiento';
+  
+  const banner = $('sectorBanner');
+  if (banner) banner.classList.add('hidden');
+
+  if (preselectedSector && SECTORS.includes(preselectedSector)) {
+      $('sector').value = preselectedSector; 
+      
+      if (banner) {
+          banner.innerHTML = `📍 Escaneado desde QR - Cargando en: <strong>${preselectedSector}</strong>`;
+          banner.classList.remove('hidden');
+      }
+  }
+
   show('product');
 }
 
