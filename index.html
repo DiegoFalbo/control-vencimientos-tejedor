@@ -86,7 +86,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
         <span class="sync">Sincronizado en la nube</span>
       </div>
       <div class="actions">
-        <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad, lote y sector.</small></button>
+        <button class="action blue" onclick="openProduct()"><span>＋</span><strong>Cargar vencimiento</strong><small>Registrar descripción, SKU, cantidad y sector.</small></button>
         <button class="action red" onclick="show('critical')"><span>!</span><strong>Ver críticos</strong><small>Vencidos y productos que vencen dentro de 30 días.</small></button>
         <button class="action green" onclick="show('history')"><span>📋</span><strong>Historial de gestión</strong><small>Modificaciones, eliminaciones, retiros y cambios operativos.</small></button>
         <button id="adminButton" class="action purple" onclick="show('users')"><span>⚙</span><strong>Administrar usuarios</strong><small>Crear, modificar, asignar roles y restablecer PIN.</small></button>
@@ -135,8 +135,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
             <div class="full"><label>Descripción *</label><input id="description" required placeholder="Nombre del producto"></div>
             <div><label>Cantidad *</label><input id="quantity" type="number" min="1" value="1" required></div>
             <div><label>Vencimiento *</label><input id="expiry" type="date" required></div>
-            <div><label>Lote</label><input id="batch"></div>
-            <div><label>Sector *</label><select id="sector" required></select></div>
+            <div class="full"><label>Sector *</label><select id="sector" required></select></div>
             <div class="full"><label>Observaciones</label><textarea id="notes" rows="3"></textarea></div>
           </div>
           <div class="form-actions">
@@ -214,7 +213,7 @@ main{max-width:1180px;margin:auto;padding:20px 16px 20px;flex:1;width:100%;}.vie
         </div>
         <p class="sub" style="margin-top: -8px;">Carga masiva desde archivo Excel (.xlsx, .xls, .csv). Funcionalidad exclusiva para el usuario <strong>Master</strong>.</p>
         <div class="warning" style="margin-top:12px; margin-bottom: 12px;">
-          💡 <strong>Estructura requerida:</strong> Columna A = <b>Código SKU / EAN</b> | Columna B = <b>Descripción del producto</b>.<br>
+          💡 <b>Estructura requerida:</b> Columna A = <b>Código SKU / EAN</b> | Columna B = <b>Descripción del producto</b>.<br>
           Esta actualización fusiona los códigos en la nube <b>sin borrar</b> los vencimientos ni registros operativos.
         </div>
         <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
@@ -706,7 +705,6 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const description = $('description').value.trim();
   const quantity = parseInt($('quantity').value) || 1;
   const expiry = $('expiry').value;
-  const batch = $('batch').value.trim();
   const sector = $('sector').value;
   const notes = $('notes').value.trim();
 
@@ -721,7 +719,7 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   }
 
   const productData = {
-    sku, description, quantity, expiry, batch, sector, notes,
+    sku, description, quantity, expiry, sector, notes,
     updatedAt: new Date().toISOString(),
     updatedBy: current ? current.name : 'Sistema'
   };
@@ -808,7 +806,6 @@ function renderProducts(){
             <span>Cant: <b>${item.quantity}</b></span>
             <span>Sector: <b>${esc(item.sector)}</b></span>
             <span>Vencimiento: <b>${item.expiry}</b></span>
-            ${item.batch ? `<span>Lote: ${esc(item.batch)}</span>` : ''}
           </div>
           ${item.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:5px">Obs: ${esc(item.notes)}</div>` : ''}
         </div>
@@ -913,7 +910,6 @@ function editProduct(id){
   $('description').value = item.description;
   $('quantity').value = item.quantity;
   $('expiry').value = item.expiry;
-  $('batch').value = item.batch || '';
   $('sector').value = item.sector;
   $('notes').value = item.notes || '';
   $('productTitle').textContent = 'Editar vencimiento';
